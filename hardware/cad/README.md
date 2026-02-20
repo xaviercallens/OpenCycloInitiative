@@ -12,8 +12,11 @@ We are using a code-to-cad modeling approach (via `cadquery`). This solves OQ-1 
 4. `03_Top_Manifold.py`: Top manifold CNC porting. (Re: OQ-6 Material decision — we have settled on Delrin (POM-C) for superior machinability and thread retention compared to HDPE).
 5. `04_Hydrocyclone_Harvester.py`: 100mm Rietema-proportioned SLA extraction cyclone.
 
-### Generating the Output Files
-Before machining or creating OpenFOAM `snappyHexMeshDict` stl bounds, install cadquery:
+### Accessing the Files (FreeCAD)
+The generated `.step` and `.stl` files are already tracked in the repository and are placed directly in `hardware/cad/`. You only need to clone the repository and open the files directly using **FreeCAD**, SolidWorks, or Fusion360. You do NOT need to regenerate them unless you are adjusting the core geometry parameters.
+
+### Modifying the Source Files
+Before adjusting the `cadquery` python scripts dynamically, install cadquery:
 
 ```bash
 pip install cadquery
