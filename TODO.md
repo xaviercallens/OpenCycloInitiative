@@ -112,7 +112,7 @@ Integration milestones are marked **[INT]**.
   - [x] `NURSERY` — continuous 30% LED, low-shear VFD (30%), 48h timer
   - [x] `LOGARITHMIC_GROWTH` — ramping LED duty cycle, increasing pump speed
   - [x] `STEADY_STATE_TURBIDOSTAT` — full turbidostat loop with vision-triggered harvest
-- [ ] State transition logic and persistence (recover after power loss)
+- [x] State transition logic and persistence (recover after power loss) → `state_persistence.py`
 - [ ] **[INT]** Integration test with mock sensor inputs
 
 ### 3.2 Vision Soft Sensor — `vision_density.py`
@@ -152,9 +152,10 @@ Integration milestones are marked **[INT]**.
 - [ ] ⚠️ **Physics dependency:** PWM frequency formula requires vortex angular velocity model — cross-reference CFD results from Phase 4
 
 ### 3.5 Deployment
-- [ ] `systemd` service unit file (`opencyclo.service`) — auto-start on boot
-- [ ] `deploy/setup.sh` — one-shot provisioning script for Jetson Nano / RPi 5
-- [ ] `deploy/calibration.py` — guided script for polynomial curve and ROI mask setup
+- [x] `systemd` service unit file — embedded in `deploy/setup.sh`
+- [x] `deploy/setup.sh` — one-shot provisioning script for Jetson Nano / RPi 5
+- [x] `deploy/calibration.py` — guided script for polynomial curve and ROI mask setup
+- [x] `telemetry_api.py` — FastAPI REST + WebSocket telemetry server
 - [ ] **[INT]** End-to-end hardware-in-the-loop test on bench reactor
 
 ---
@@ -166,28 +167,29 @@ Integration milestones are marked **[INT]**.
   - [ ] Target: ~X million cells (fill in from solver spec)
   - [ ] 5-layer prism boundary layer at polycarbonate wall (y+ target: fill in value)
   - [ ] Refinement zones: tangential inlet, vortex core, sparger region
-- [ ] `system/blockMeshDict` — coarse background mesh
+- [x] `system/blockMeshDict` — cylindrical background mesh with OQ-1 dimensions
 - [ ] `constant/triSurface/` — import STL surfaces of reactor geometry
 - [ ] Run mesh quality checks: `checkMesh`, ortho quality > 0.01, max non-orthogonality < 70°
 
 ### 4.2 Physical Setup
-- [ ] `constant/phaseProperties` — define water (liquid) and CO₂ (gas) phases
-- [ ] `constant/turbulenceProperties` — set `kOmegaSST` model
-- [ ] `constant/g` — gravity vector
-- [ ] Population Balance Equation (PBE) setup for bubble size distribution (init at ~1 µm nanobubbles)
+- [x] `constant/phaseProperties` — MUSIG bubble model + Higbie mass transfer + Tomiyama lift
+- [x] `constant/turbulenceProperties` — k-ω SST with Menter coefficients
+- [x] `constant/g` — gravity vector
+- [x] `constant/radiationProperties` — fvDOM radiative transfer for LED photon field
+- [x] Population Balance Equation (PBE) setup for bubble size distribution (1µm → 1mm MUSIG groups)
 
 ### 4.3 Boundary Conditions (`0/` directory)
-- [ ] `0/U.water` — tangential inlet: fixed flow rate (fill in value from spec)
+- [x] `0/U.water` — tangential inlet: 14.7 m/s fixed (OQ-2: 94mm offset tangential)
 - [ ] `0/U.gas` — sparger: fixed mass flow flux; PBE bubble diameter
-- [ ] `0/p_rgh` — top vent: `degassingBoundary` (gas-slip, liquid-reflect)
-- [ ] `0/alpha.water` — phase fraction initialization
-- [ ] `0/k`, `0/omega` — turbulence initial and boundary conditions
+- [x] `0/p_rgh` — atmospheric outlet + fixed-flux walls
+- [x] `0/alpha.water` — phase fraction (99.9% water, 0.1% gas initial)
+- [x] `0/k`, `0/omega` — turbulence BCs with wall functions + inlet values
 
 ### 4.4 Solver Configuration
-- [ ] `system/fvSchemes` — divergence schemes (Gauss MUSCL for stability in swirling flow)
-- [ ] `system/fvSolution` — PIMPLE loop settings, relaxation factors
-- [ ] `system/controlDict` — timestep (start at 1e-4 s), end time, write interval
-- [ ] `system/decomposeParDict` — MPI decomposition for parallel run
+- [x] `system/fvSchemes` — MUSCL divergence (vortex-preserving) + corrected Laplacian
+- [x] `system/fvSolution` — PIMPLE-GAMG solver with tuned relaxation
+- [x] `system/controlDict` — adaptive CFL, shear rate monitoring, Q-criterion, streamlines
+- [x] `system/decomposeParDict` — 8-core scotch MPI decomposition
 
 ### 4.5 Validation & Post-processing
 - [ ] **Primary validation criterion:** Max turbulent shear rate (G_max) in pump impeller and vortex core ≤ threshold (fill in from spec — critical for *Chlorella* cell wall integrity)
@@ -232,19 +234,30 @@ Integration milestones are marked **[INT]**.
 ## 🌊 PHASE 6 — Digital Twin (`/physics/cyclo_twin/`)
 *Simulating the 1000L industrial vessel using High-Fidelity CFD and PINNs.*
 
-- [ ] **OpenFOAM Case Setup:**
-  - [ ] `snappyHexMesh` with 5-layer prism insertion (y+ < 1)
-  - [ ] `reactingMultiphaseEulerFoam` with MUSIG bubble model (OQ-6)
-  - [ ] Higbie Penetration Theory for CO2 mass transfer calibration
-- [ ] **Lagrangian Cellular Tracking:**
-  - [ ] Inject 100,000 massless tracer particles
-  - [ ] Implement **Han Photosynthetic ODE Model** in Python via preCICE
+- [x] **OpenFOAM Case Setup:**
+  - [ ] `snappyHexMesh` with 5-layer prism insertion (y+ < 1) — pending CAD STL
+  - [x] `reactingMultiphaseEulerFoam` with MUSIG bubble model (OQ-6)
+  - [x] Higbie Penetration Theory for CO2 mass transfer calibration
+  - [x] fvDOM radiative transfer for LED photonic field
+- [x] **Lagrangian Cellular Tracking:**
+  - [ ] Inject 100,000 massless tracer particles (needs snappyHexMesh)
+  - [x] Implement **Han Photosynthetic ODE Model** — `han_model.py` with RK4 solver + FLE optimizer
 - [ ] **PINN Surrogate Engine:**
   - [ ] Train **NVIDIA Modulus** FNO model on OpenFOAM snapshots
   - [ ] Deploy TensorRT engine for <20ms real-time inference
-- [ ] **Synthetic Vision Pipeline:**
+- [x] **Synthetic Vision Pipeline:**
   - [ ] Fluid-to-VDB export script
-  - [ ] Blender/Godot headless renderer for synthetic YOLOv8 training (OQ-8)
+  - [x] Blender headless renderer for synthetic YOLOv8 training — `render_vdb.py`
+- [x] **SITL Bridge:**
+  - [x] ROS 2 Virtual Hardware Bridge (with TCP standalone fallback)
+  - [x] SimplifiedPhysicsModel for testing without PINN
+  - [x] Docker Compose stack (OpenFOAM + Modulus + Blender + SITL + MQTT)
+- [x] **Cyclo-Earth Planetary Simulator:**
+  - [x] PSC flux equations (F_cyclo, F_char, F_soil)
+  - [x] Simplified Hector-equivalent climate model
+  - [x] Reality Sync module + MQTT telemetry ingestion
+  - [x] FastAPI backend API
+  - [x] Pre-built scenarios (conservative, aggressive, alpha_node)
 
 ---
 

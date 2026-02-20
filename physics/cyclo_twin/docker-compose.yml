@@ -1,0 +1,173 @@
+# ══════════════════════════════════════════════════════════════════════════
+# CycloTwin Digital Twin — Docker Compose Stack
+# ══════════════════════════════════════════════════════════════════════════
+#
+# Deploys the full CycloTwin SITL environment:
+#   1. oc-cfd-core      — OpenFOAM solver for offline CFD
+#   2. oc-pinn-rt       — NVIDIA Modulus real-time physics engine
+#   3. oc-render-engine — Blender headless for synthetic vision
+#   4. oc-sitl-bridge   — ROS 2 + MQTT virtual hardware bridge
+#   5. oc-telemetry     — FastAPI telemetry server
+#
+# Usage:
+#   docker compose up -d                  # Start all services
+#   docker compose up oc-sitl-bridge      # SITL only (fastest)
+#   docker compose logs -f oc-pinn-rt     # Watch PINN inference
+#
+# Requirements:
+#   - Docker Engine 24+ with BuildKit
+#   - NVIDIA Container Toolkit (for GPU services)
+#   - nvidia-docker2 runtime
+#
+# Spec reference: Digital Twin Specification §7
+# ══════════════════════════════════════════════════════════════════════════
+
+version: "3.9"
+
+x-gpu-deploy: &gpu-deploy
+  deploy:
+    resources:
+      reservations:
+        devices:
+          - driver: nvidia
+            count: 1
+            capabilities: [gpu]
+
+services:
+
+  # ──────────────────────────────────────────────
+  # 1. OpenFOAM CFD Solver
+  # ──────────────────────────────────────────────
+  oc-cfd-core:
+    image: opencfd/openfoam-default:2312
+    container_name: oc-cfd-core
+    volumes:
+      - ./:/workspace/cyclo_twin
+      - cfd-results:/workspace/results
+    working_dir: /workspace/cyclo_twin
+    command: >
+      bash -c "
+        echo '🌊 OpenFOAM CFD Core starting...'
+        echo 'Run manually: blockMesh && decomposePar && mpirun -np 8 reactingMultiphaseEulerFoam -parallel'
+        tail -f /dev/null
+      "
+    environment:
+      - WM_PROJECT=OpenFOAM
+      - FOAM_MPI=sys-openmpi
+    cpus: 8
+    mem_limit: 16g
+    restart: unless-stopped
+    profiles:
+      - cfd  # Only start with: docker compose --profile cfd up
+
+  # ──────────────────────────────────────────────
+  # 2. NVIDIA Modulus PINN Real-Time Engine
+  # ──────────────────────────────────────────────
+  oc-pinn-rt:
+    image: nvcr.io/nvidia/modulus/modulus:24.04
+    container_name: oc-pinn-rt
+    <<: *gpu-deploy
+    volumes:
+      - ./:/workspace/cyclo_twin
+      - pinn-models:/workspace/models
+    working_dir: /workspace/cyclo_twin
+    command: >
+      bash -c "
+        echo '🧠 NVIDIA Modulus PINN Engine starting...'
+        echo 'Place trained .onnx model in /workspace/models/'
+        python3 -c 'import modulus; print(f\"Modulus {modulus.__version__} loaded\")'
+        tail -f /dev/null
+      "
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - CUDA_VISIBLE_DEVICES=0
+    ports:
+      - "8422:8422"  # PINN inference API
+    restart: unless-stopped
+    profiles:
+      - gpu
+
+  # ──────────────────────────────────────────────
+  # 3. Blender Headless Render Engine
+  # ──────────────────────────────────────────────
+  oc-render-engine:
+    image: linuxserver/blender:4.0.0
+    container_name: oc-render-engine
+    <<: *gpu-deploy
+    volumes:
+      - ./synthetic_vision:/workspace/synthetic_vision
+      - synthetic-data:/output
+    working_dir: /workspace/synthetic_vision
+    command: >
+      bash -c "
+        echo '🎯 Blender Synthetic Vision Engine starting...'
+        echo 'Usage: blender --background --python render_vdb.py -- --n-frames 1000'
+        tail -f /dev/null
+      "
+    environment:
+      - DISPLAY=:0
+    restart: unless-stopped
+    profiles:
+      - gpu
+
+  # ──────────────────────────────────────────────
+  # 4. SITL Bridge (ROS 2 + Virtual Hardware)
+  # ──────────────────────────────────────────────
+  oc-sitl-bridge:
+    build:
+      context: .
+      dockerfile: Dockerfile.sitl
+    image: opencyclo/sitl-bridge:latest
+    container_name: oc-sitl-bridge
+    volumes:
+      - ./sitl:/workspace/sitl
+      - ../../software/opencyclo_os:/workspace/opencyclo_os
+    working_dir: /workspace
+    command: python3 sitl/ros2_hardware_bridge.py
+    ports:
+      - "8421:8421"  # TCP simulator interface
+    environment:
+      - ROS_DOMAIN_ID=42
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+
+  # ──────────────────────────────────────────────
+  # 5. Telemetry API (FastAPI)
+  # ──────────────────────────────────────────────
+  oc-telemetry:
+    image: python:3.12-slim
+    container_name: oc-telemetry
+    volumes:
+      - ../../software/opencyclo_os:/app
+    working_dir: /app
+    command: >
+      bash -c "
+        pip install -q fastapi uvicorn
+        uvicorn telemetry_api:app --host 0.0.0.0 --port 8420
+      "
+    ports:
+      - "8420:8420"  # REST API + WebSocket
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+
+  # ──────────────────────────────────────────────
+  # 6. MQTT Broker (for Cyclo-Earth IoT Telemetry)
+  # ──────────────────────────────────────────────
+  oc-mqtt:
+    image: eclipse-mosquitto:2.0
+    container_name: oc-mqtt
+    ports:
+      - "1883:1883"   # MQTT
+      - "9001:9001"   # WebSocket MQTT
+    volumes:
+      - mosquitto-data:/mosquitto/data
+      - mosquitto-logs:/mosquitto/log
+    restart: unless-stopped
+
+volumes:
+  cfd-results:
+  pinn-models:
+  synthetic-data:
+  mosquitto-data:
+  mosquitto-logs:

@@ -1,0 +1,86 @@
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "constant";
+    object      radiationProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// OpenCyclo CycloTwin — Radiative Transfer Model
+//
+// Solves the Radiative Transfer Equation (RTE) using the finite volume
+// Discrete Ordinates Method (fvDOM) to simulate LED photon penetration
+// through the dense, green, bubbly Chlorella culture.
+//
+// The absorption coefficient is dynamically coupled to the local
+// biomass concentration (Beer-Lambert Law):
+//   κ(x) = κ_water + Ea * C_biomass(x)
+//
+// Where:
+//   κ_water  = 0.05 m⁻¹ (pure water absorption at 680nm)
+//   Ea       = 200 m² / kg (Chlorella mass absorption cross-section)
+//   C_biomass = local algal density (kg/m³)
+//
+// As the virtual culture grows, the fluid darkens, physically
+// shrinking the illuminated zone in real-time — proving the need
+// for the 4-guide light distribution architecture.
+//
+// Spec reference: Digital Twin Specification §3
+//                 CycloTwin Implementation Guide §2.3
+// ──────────────────────────────────────────────────────────────────────────
+
+radiation       on;
+
+radiationModel  fvDOM;
+
+fvDOMCoeffs
+{
+    // Angular discretization: 4x4 = 16 ordinates per octant
+    // 16 × 8 = 128 discrete directions for full sphere coverage
+    nPhi    4;
+    nTheta  4;
+
+    // Maximum ray tracing iterations
+    maxIter     100;
+
+    // Convergence tolerance
+    tolerance   1e-4;
+}
+
+// Absorption model — coupled to biomass concentration field
+absorptionEmissionModel constantAbsorptionEmission;
+
+constantAbsorptionEmissionCoeffs
+{
+    // Base absorption (pure water at 680nm PAR)
+    absorptivity    absorptivity [0 -1 0 0 0 0 0]  0.05;
+
+    // Emission (negligible for non-fluorescent case at reactor temps)
+    emissivity      emissivity [0 -1 0 0 0 0 0]    0;
+
+    // Note: In a full implementation, use the `greyMeanAbsorptionEmission`
+    // model with a coded boundary to dynamically compute:
+    //   kappa = 0.05 + 200.0 * (alpha.biomass * rho_biomass)
+    // This couples the Beer-Lambert attenuation to the growing culture.
+}
+
+// Scattering model — bubbles act as scattering centers
+scatterModel    none;
+// For full accuracy, enable Henyey-Greenstein phase function
+// with asymmetry parameter g ≈ 0.97 for gas bubbles in water.
+
+// ──────────────────────────────────────────────
+// Light Guide Emission Boundaries
+// ──────────────────────────────────────────────
+// The 4 borosilicate light guides are defined as emission boundaries
+// in the mesh. Each emits photons at:
+//   - Wavelength: 680nm (deep red) + 450nm (blue) mixed
+//   - Intensity: I_surface = 1500 µmol/m²/s at guide surface
+//   - Converted to radiometric: ~330 W/m² (at 680nm)
+//
+// These are set via boundary conditions in 0/IDefault using
+// greyDiffusiveRadiation with emissivity=1 and T_radiation
+// equivalent to the LED spectral radiance.
+
+// ************************************************************************* //

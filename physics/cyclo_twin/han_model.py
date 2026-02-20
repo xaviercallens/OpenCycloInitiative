@@ -130,7 +130,7 @@ def solve_han_model(
     fle_efficiency = mean_x2 / (mean_x2 + mean_x3 + 1e-12)  # FLE metric
 
     # Biomass growth rate proxy: integral of x2 over time
-    growth_integral = np.trapz(states[:, 1], t_arr)
+    growth_integral = np.trapezoid(states[:, 1], t_arr)
 
     return {
         "time": t_arr,
