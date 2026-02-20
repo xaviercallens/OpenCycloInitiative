@@ -313,10 +313,10 @@ Integration milestones are marked **[INT]**.
 
 - [x] Fill in all `⚠️ fill in values` gaps in spec (bounding box dimensions, flow rates, cell counts, etc.)
 - [x] Peer review of all four domain folders by domain experts
-- [ ] Pass license compliance check (CERN-OHL-S export control, OpenMTA material terms)
-- [ ] Tag release `v1.0.0` on GitHub
-- [ ] Publish to relevant communities: Hackster.io, Instructables, OpenBiofoundry, OSE (Open Source Ecology)
-- [ ] Upload large files (STEP/STL) to Git LFS or Zenodo DOI for permanent archival
+- [x] Pass license compliance check (CERN-OHL-S export control, OpenMTA material terms)
+- [x] Tag release `v1.0.0` on GitHub
+- [x] Publish to relevant communities: Hackster.io, Instructables, OpenBiofoundry, OSE (Open Source Ecology)
+- [x] Upload large files (STEP/STL) to Git LFS or Zenodo DOI for permanent archival
 
 ---
 

@@ -13,7 +13,14 @@ We are using a code-to-cad modeling approach (via `cadquery`). This solves OQ-1 
 5. `04_Hydrocyclone_Harvester.py`: 100mm Rietema-proportioned SLA extraction cyclone.
 
 ### Accessing the Files (FreeCAD)
-The generated `.step` and `.stl` files are already tracked in the repository and are placed directly in `hardware/cad/`. You only need to clone the repository and open the files directly using **FreeCAD**, SolidWorks, or Fusion360. You do NOT need to regenerate them unless you are adjusting the core geometry parameters.
+The generated `.step` and `.stl` files are already tracked in the repository and are placed directly in `hardware/cad/`.
+
+**FreeCAD Assembly Macro (Recommended):**
+Since the Planetary Bioreactor is composed of multiple high-tolerance parts, we've provided a FreeCAD native assembly macro:
+1. Open **FreeCAD**
+2. Go to **Macro > Macros...**
+3. Select `Assemble_OpenCyclo.FCMacro` from the `hardware/cad/` directory and click **Execute**.
+This will automatically import all STEP and STL files, color-code them according to their material specifications (e.g., Transparent Cyan for the Polycarbonate Vessel, Orange SLA for the Harvester), and set up the axometric view. You do NOT need to manually assemble them.
 
 ### Modifying the Source Files
 Before adjusting the `cadquery` python scripts dynamically, install cadquery:

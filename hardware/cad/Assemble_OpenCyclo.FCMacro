@@ -1,0 +1,60 @@
+import FreeCAD
+import FreeCADGui
+import Import
+import os
+
+# Create a new document
+doc = FreeCAD.newDocument("OpenCyclo_Planetary_Bioreactor_V1")
+
+# The directory where this macro is located (assumes it's alongside the .step/.stl files)
+macro_dir = os.path.dirname(__file__)
+
+# Map expected file names to RGBA colors (RGB or RGB + Transparency)
+parts_config = {
+    "CV_SMU1000_Master": (0.7, 0.7, 0.7),             # Silver/Gray Aluminum Extrusion
+    "01_Polycarbonate_Vessel": (0.0, 0.8, 1.0, 0.8),  # Cyan transparent Polycarbonate
+    "02_Hydro_Base_60deg": (0.4, 0.4, 0.4),           # Polished 316L Stainless Steel
+    "03_Top_Manifold": (0.1, 0.1, 0.1),               # Black POM-C (Delrin)
+    "04_Hydrocyclone_Harvester": (1.0, 0.3, 0.0)      # Orange Photopolymer SLA Resin
+}
+
+FreeCAD.Console.PrintMessage(f"Starting OpenCyclo Assembly from: {macro_dir}\n")
+
+# Import all parts
+for name, color in parts_config.items():
+    step_path = os.path.join(macro_dir, name + ".step")
+    stl_path = os.path.join(macro_dir, name + ".stl")
+    
+    try:
+        if os.path.exists(step_path):
+            FreeCAD.Console.PrintMessage(f"Importing STEP: {name}\n")
+            Import.insert(step_path, doc.Name)
+        elif os.path.exists(stl_path):
+            import Mesh
+            FreeCAD.Console.PrintMessage(f"Importing STL: {name}\n")
+            Mesh.insert(stl_path, doc.Name)
+        else:
+            FreeCAD.Console.PrintWarning(f"Missing file for: {name}. Make sure STEP/STL exists.\n")
+    except Exception as e:
+        FreeCAD.Console.PrintError(f"Failed to import {name}: {str(e)}\n")
+
+# Apply materials and colors to imported objects
+for obj in doc.Objects:
+    for name, color in parts_config.items():
+        if name in obj.Label:
+            try:
+                # ViewObject holds the GUI representation properties
+                if hasattr(obj, "ViewObject") and obj.ViewObject is not None:
+                    obj.ViewObject.ShapeColor = color[:3]
+                    if len(color) == 4:
+                        obj.ViewObject.Transparency = int(color[3] * 100)
+            except Exception as e:
+                FreeCAD.Console.PrintWarning(f"Could not color {obj.Label}: {str(e)}\n")
+
+# Recompute doc and adjust camera view
+doc.recompute()
+if FreeCADGui.activeDocument() and FreeCADGui.activeDocument().activeView():
+    FreeCADGui.SendMsgToActiveView("ViewFit")
+    FreeCADGui.activeDocument().activeView().viewAxometric()
+
+FreeCAD.Console.PrintMessage("Assembly Complete! You are ready to review the OpenCyclo specifications.\n")
