@@ -1,0 +1,102 @@
+# ──────────────────────────────────────────────
+# OpenCyclo Initiative — .gitignore
+# ──────────────────────────────────────────────
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+parts/
+var/
+sdist/
+develop-eggs/
+.installed.cfg
+lib/
+lib64/
+.env
+.venv
+env/
+venv/
+ENV/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+
+# Testing & Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# ──────────────────────────────────────────────
+# OpenFOAM / CFD
+# ──────────────────────────────────────────────
+# Simulation result time directories (large)
+physics/openfoam/[0-9]*/
+physics/openfoam/processor*/
+physics/openfoam/postProcessing/
+physics/openfoam/VTK/
+physics/openfoam/log.*
+physics/openfoam/*.foam
+physics/openfoam/*.OpenFOAM
+physics/openfoam/constant/polyMesh/
+physics/openfoam/constant/extendedFeatureEdgeMesh/
+physics/openfoam/triSurface/
+
+# ──────────────────────────────────────────────
+# Hardware / CAD (large binary files — use Git LFS)
+# ──────────────────────────────────────────────
+# Tracked via Git LFS — see .gitattributes
+# Uncommenting below would exclude them entirely:
+# *.step
+# *.stl
+# *.iges
+# *.igs
+# *.stp
+
+# Proprietary CAD formats (not redistributable)
+*.f3d
+*.FCStd
+*.sldprt
+*.sldasm
+*.catpart
+*.catproduct
+
+# Render / simulation exports
+*.gcode
+*.3mf
+*.amf
+
+# ──────────────────────────────────────────────
+# OS & Editor artifacts
+# ──────────────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
+*~
+.vscode/settings.json
+.idea/
+
+# ──────────────────────────────────────────────
+# Secrets & credentials (NEVER commit these)
+# ──────────────────────────────────────────────
+*.env
+secrets.py
+credentials.json
+service_account.json

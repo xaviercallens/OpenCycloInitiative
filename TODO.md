@@ -1,0 +1,267 @@
+# 📋 OpenCyclo Initiative — Implementation Plan
+
+> Derived from `docs/technical_specifications.md` v1.0.0  
+> Last updated: 2026-02-20
+
+---
+
+## 🗺️ Overview
+
+The project spans **four engineering domains** that must be developed in parallel with well-defined integration points:
+
+| Domain | Folder | Maturity Target |
+|---|---|---|
+| Hardware / CAD | `/hardware/cad/` | Fabrication-ready STEP + STL files |
+| Software / Control OS | `/software/opencyclo_os/` | Deployable Python daemon (Jetson Nano / RPi 5) |
+| Physics / CFD | `/physics/openfoam/` | Validated `kOmegaSST` simulation case |
+| Wetware / Protocols | `/wetware/protocols/` | OpenMTA-compliant SOP documents |
+
+Integration milestones are marked **[INT]**.
+
+---
+
+## 🏗️ PHASE 1 — Repository Foundation *(Day 1–2)*
+
+- [x] Create root `README.md` with structure overview and quick-start
+- [x] Add `.gitignore` (Python, OpenFOAM output, proprietary CAD formats)
+- [x] Add `.gitattributes` — configure **Git LFS** tracking for `*.step`, `*.stl`, `*.iges`, `*.stp`
+- [x] Create `LICENSE` files:
+  - [x] `LICENSE-HARDWARE` → CERN-OHL-S v2 full text
+  - [x] `LICENSE-SOFTWARE` → MIT License full text
+  - [x] `LICENSE-WETWARE` → OpenMTA full text
+- [x] Create `CONTRIBUTING.md` — PR process, coding standards, file naming conventions
+- [x] Initialize folder skeleton (all four domain trees with placeholder `.gitkeep` files)
+- [ ] **[INT]** First commit: empty-but-valid repo structure pushed to GitHub
+
+---
+
+## ⚙️ PHASE 2 — Hardware / CAD (`/hardware/cad/`) *(Weeks 1–4)*
+
+### 2.1 Master Assembly — `CV_SMU1000_Master.step`
+- [ ] Define frame skeleton using 80/20 aluminum extrusion profiles (standard T-slot series)
+- [ ] Position and constrain all sub-assemblies within the master file
+- [ ] Validate bounding box and interference checks
+- [ ] Export `.STEP` (AP214) for CNC compatibility
+
+### 2.2 Main PBR Cylinder — `01_Polycarbonate_Vessel.step`
+- [ ] Model UV-stabilized extruded Polycarbonate tube
+  - Material annotation: UV-PC, no PMMA/Acrylic
+  - Flat machined end-lips for EPDM gasket mating (specify gasket groove dims)
+  - Zero side penetrations (hoop-strength preservation)
+- [ ] Parameterize: length, OD, wall thickness (fill in values from physical validation)
+- [ ] Document CNC machining call-outs in drawing sheet
+
+### 2.3 Cyclo-Vortex Base Cone — `02_Hydro_Base_60deg.step`
+- [ ] Model 316L SS base cone with 60° angle of repose
+- [ ] Compute and model tangential inlet port offset (mathematically tangent to inner circumference — **critical: prevents cavitation**)
+  - Port spec: 1.5-inch Tri-Clamp, positioned from bottom apex (fill exact offset)
+- [ ] Model 2.0-inch Tri-Clamp nadir drain at apex
+- [ ] Include threaded seat for nanobubble sparger insert
+- [ ] Electropolish surface finish callout on drawing
+- [ ] ⚠️ **Risk:** Tangent inlet geometry is the defining hydrodynamic feature — validate mathematically before machining
+
+### 2.4 Top Light & Sensor Manifold — `03_Top_Manifold.step`
+- [ ] Material: CNC-milled Delrin (POM-C) or HDPE (decision needed — cost vs. machinability)
+- [ ] Model 4× borosilicate light guide boreholes with dual O-ring grooves
+- [ ] Model 3× PG13.5 threaded sensor ports (pH, DO, Temperature probes)
+- [ ] Model 1× central exhaust/degassing port
+- [ ] Model 1× media top-up threaded port
+- [ ] Verify O-ring groove dimensions (AS568 standard)
+
+### 2.5 Hydrocyclone Harvester — `04_Hydrocyclone_Harvester.stl`
+- [ ] Model using standard **Rietema proportions** (look-up table for D_c, D_u, D_o)
+  - Fill in: main cylinder diameter, underflow apex diameter, overflow vortex-finder diameter
+- [ ] Design for FDM/SLA print orientation (minimize supports at pressure surfaces)
+- [ ] Material annotation: PETG / Nylon / SLA Tough Resin, 100% infill
+- [ ] Validate pressure rating at 3 Bar (factor of safety ≥ 2.5)
+- [ ] Export final `.stl` at 0.05mm chord deviation for surface fidelity
+
+### 2.6 Documentation
+- [ ] `hardware/cad/README.md` — BOM, material specs, machining notes, supplier recommendations
+- [ ] `hardware/cad/BOM.csv` — Full Bill of Materials with part numbers and sources
+
+---
+
+## 🐍 PHASE 3 — Software / Control OS (`/software/opencyclo_os/`) *(Weeks 2–6)*
+
+### 3.0 Infrastructure
+- [x] `config.py` — All system constants (setpoints, pin maps, I2C addresses, thresholds)
+- [x] `requirements.txt` — Pin all dependency versions:
+  ```
+  asyncio (stdlib)
+  smbus2
+  pymodbus
+  ultralytics   # YOLOv8
+  opencv-python
+  numpy
+  simple-pid
+  RPi.GPIO      # or Jetson.GPIO on Jetson Nano
+  ```
+- [x] `utils/logger.py` — Structured logging (JSON lines) with log rotation
+- [x] `utils/webhook.py` — HTTP webhook dispatcher (biosecurity alerts)
+- [x] Unit test scaffold: `tests/` with `pytest` + `pytest-asyncio`
+
+### 3.1 Core Orchestrator — `main_loop.py`
+- [x] Implement `asyncio` event loop with graceful shutdown on SIGTERM/SIGINT
+- [x] I2C bus initialization (`smbus2`) — bus 0 and bus 1
+- [x] Instantiate all PID controllers with initial tuning params from `config.py`
+- [x] RS-485 communication to pump VFD via `pymodbus`
+  - [x] Read actual pump frequency (Hz) for LED sync
+  - [x] Write speed setpoints (% of max)
+- [x] **State Machine** — three operating modes:
+  - [x] `NURSERY` — continuous 30% LED, low-shear VFD (30%), 48h timer
+  - [x] `LOGARITHMIC_GROWTH` — ramping LED duty cycle, increasing pump speed
+  - [x] `STEADY_STATE_TURBIDOSTAT` — full turbidostat loop with vision-triggered harvest
+- [ ] State transition logic and persistence (recover after power loss)
+- [ ] **[INT]** Integration test with mock sensor inputs
+
+### 3.2 Vision Soft Sensor — `vision_density.py`
+- [x] Camera init: 1080p Arducam via OpenCV `VideoCapture`
+- [x] **Biomass Density Algorithm:**
+  - [x] Define and save ROI mask (calibration step)
+  - [x] Capture at 10 FPS → extract mean RGB tensor
+  - [x] Convert to HSV → compute Green/Red channel ratio
+  - [x] Map ratio to Dry Weight g/L via pre-calibrated polynomial regression curve
+  - [x] Output: `float` (g/L) with ±X% accuracy annotation
+  - [ ] ⚠️ **Calibration task:** Polynomial curve requires empirical data collection against physical centrifuge dry-weight measurements — plan lab sessions
+- [x] **Biosecurity Algorithm:**
+  - [x] Load YOLOv8 INT8 quantized model (`best_biosecurity.pt`)
+  - [x] Run secondary inference at configurable interval (e.g., 1/10 frames)
+  - [x] Detect: *Brachionus* rotifers, biofilm morphological anomalies
+  - [x] Trigger webhook if confidence ≥ 85%
+- [x] Expose `async` coroutine interface for `main_loop.py`
+- [ ] ⚠️ **Dependency:** YOLOv8 biosecurity model must be trained/sourced separately — add to model training task list
+
+### 3.3 pH-stat / CO₂ Dosing — `ph_stat_co2.py`
+- [x] Atlas Scientific I2C pH probe read loop at 1 Hz (`smbus2`)
+- [x] `simple-pid` controller: setpoint pH 6.8
+- [x] Output: PWM signal to 24V CO₂ proportional solenoid valve via `RPi.GPIO` / `Jetson.GPIO`
+- [x] PH Shock override mode (for SOP-104 contamination response):
+  - [x] Expose `override_ph_shock(target_ph=4.5, hold_hours=4)` coroutine
+  - [x] Automated timer to restore normal setpoint after hold period
+- [x] Log all pH readings to time-series (for growth correlation analysis)
+- [ ] ⚠️ **Tuning:** PID gains (Kp, Ki, Kd) require empirical tuning on live culture — document initial starting values
+
+### 3.4 LED PWM Sync — `led_pwm_sync.py`
+- [x] Read VFD pump frequency from `main_loop.py` shared state
+- [x] Compute fluid angular velocity from pump frequency
+- [x] Calculate optimal hardware PWM frequency to match cell transit time across borosilicate light guides
+- [x] Set hardware PWM at 50% duty cycle (10ms ON / 10ms OFF at base speed)
+- [x] Dynamically adjust PWM frequency as pump speed changes
+- [x] Expose control to state machine (`NURSERY` mode = continuous, non-pulsing, 30% intensity)
+- [ ] ⚠️ **Physics dependency:** PWM frequency formula requires vortex angular velocity model — cross-reference CFD results from Phase 4
+
+### 3.5 Deployment
+- [ ] `systemd` service unit file (`opencyclo.service`) — auto-start on boot
+- [ ] `deploy/setup.sh` — one-shot provisioning script for Jetson Nano / RPi 5
+- [ ] `deploy/calibration.py` — guided script for polynomial curve and ROI mask setup
+- [ ] **[INT]** End-to-end hardware-in-the-loop test on bench reactor
+
+---
+
+## 🌊 PHASE 4 — CFD Simulation (`/physics/openfoam/`) *(Weeks 3–5)*
+
+### 4.1 Mesh Generation
+- [ ] `system/snappyHexMeshDict` — configure hexahedral-dominant parametric mesh
+  - [ ] Target: ~X million cells (fill in from solver spec)
+  - [ ] 5-layer prism boundary layer at polycarbonate wall (y+ target: fill in value)
+  - [ ] Refinement zones: tangential inlet, vortex core, sparger region
+- [ ] `system/blockMeshDict` — coarse background mesh
+- [ ] `constant/triSurface/` — import STL surfaces of reactor geometry
+- [ ] Run mesh quality checks: `checkMesh`, ortho quality > 0.01, max non-orthogonality < 70°
+
+### 4.2 Physical Setup
+- [ ] `constant/phaseProperties` — define water (liquid) and CO₂ (gas) phases
+- [ ] `constant/turbulenceProperties` — set `kOmegaSST` model
+- [ ] `constant/g` — gravity vector
+- [ ] Population Balance Equation (PBE) setup for bubble size distribution (init at ~1 µm nanobubbles)
+
+### 4.3 Boundary Conditions (`0/` directory)
+- [ ] `0/U.water` — tangential inlet: fixed flow rate (fill in value from spec)
+- [ ] `0/U.gas` — sparger: fixed mass flow flux; PBE bubble diameter
+- [ ] `0/p_rgh` — top vent: `degassingBoundary` (gas-slip, liquid-reflect)
+- [ ] `0/alpha.water` — phase fraction initialization
+- [ ] `0/k`, `0/omega` — turbulence initial and boundary conditions
+
+### 4.4 Solver Configuration
+- [ ] `system/fvSchemes` — divergence schemes (Gauss MUSCL for stability in swirling flow)
+- [ ] `system/fvSolution` — PIMPLE loop settings, relaxation factors
+- [ ] `system/controlDict` — timestep (start at 1e-4 s), end time, write interval
+- [ ] `system/decomposeParDict` — MPI decomposition for parallel run
+
+### 4.5 Validation & Post-processing
+- [ ] **Primary validation criterion:** Max turbulent shear rate (G_max) in pump impeller and vortex core ≤ threshold (fill in from spec — critical for *Chlorella* cell wall integrity)
+- [ ] `system/functionObjects/` — field monitoring: `volFieldValue` for G_max, `streamlines` for vortex visualization
+- [ ] Generate: velocity contour plots, shear rate maps, kLa distribution
+- [ ] `physics/openfoam/VALIDATION_REPORT.md` — document convergence, mesh independence study, and biological validation criteria pass/fail
+- [ ] **[INT]** CFD-derived angular velocity data feeds LED PWM frequency formula (Phase 3.4)
+
+---
+
+## 🧫 PHASE 5 — Wetware / Protocols (`/wetware/protocols/`) *(Weeks 1–3)*
+
+- [ ] `SOP-101_Media_Formulation.md`
+  - [ ] Document wastewater/digestate sourcing, characterization tests
+  - [ ] Filtration procedure: bag filter spec (fill in micron rating)
+  - [ ] UV-C sterilization: inline unit sizing for 1000L/batch (fill in mJ/cm² dose)
+  - [ ] Media quality QC checklist (N:P ratio targets for *Chlorella*)
+
+- [ ] `SOP-102_Strain_Inoculation.md`
+  - [ ] Strain sourcing: UTEX 2714 order procedure
+  - [ ] 50L seed carboy propagation protocol
+  - [ ] Step-by-step inoculation checklist with aseptic technique notes
+  - [ ] AI Nursery Mode activation procedure
+
+- [ ] `SOP-103_Turbidostat_Harvesting.md`
+  - [ ] Biomass density trigger threshold: fill in g/L setpoint
+  - [ ] 3-way motorized valve operation procedure
+  - [ ] Hydrocyclone operating procedure (3 Bar inlet pressure)
+  - [ ] Volume balance: 150L harvest → ~X L paste + ~Y L clarified return + fresh media draw
+  - [ ] Downstream routing: Hydrothermal Liquefaction (HTL) vs. Kiln for Biochar
+
+- [ ] `SOP-104_Contamination_Biosecurity.md`
+  - [ ] Rotifer/ciliate identification guide with reference images
+  - [ ] pH Shock procedure: detailed step-by-step with safety warnings
+  - [ ] Recovery monitoring protocol (48h window)
+  - [ ] Escalation path if culture does not recover
+
+- [ ] `wetware/protocols/STRAIN_REGISTRY.md` — strains used, sources, passages, storage conditions
+
+---
+
+## 🔗 PHASE 6 — Integration & Validation *(Weeks 6–8)*
+
+- [ ] **[INT-1]** CAD → CFD: Import finalized `02_Hydro_Base_60deg.step` geometry into OpenFOAM mesh pipeline
+- [ ] **[INT-2]** CFD → Software: Extract kLa values and vortex angular velocity; update `led_pwm_sync.py` constants
+- [ ] **[INT-3]** Software bench test: Run full `main_loop.py` with simulated sensor inputs; validate state machine transitions
+- [ ] **[INT-4]** Biosecurity model: Train or source YOLOv8 INT8 model; validate detection accuracy
+- [ ] **[INT-5]** Calibration run: Collect biomass vs. RGB data points; fit polynomial regression curve
+- [ ] **[INT-6]** Full wet run: Operate SMU-1000 prototype with all software systems active; log 7-day continuous culture
+- [ ] **[INT-7]** Turbidostat validation: Confirm automated harvest trigger and volume balance
+- [ ] Draft `VALIDATION_REPORT.md` summarizing all test results against spec criteria
+
+---
+
+## 📦 PHASE 7 — Release Preparation *(Week 8+)*
+
+- [ ] Fill in all `⚠️ fill in values` gaps in spec (bounding box dimensions, flow rates, cell counts, etc.)
+- [ ] Peer review of all four domain folders by domain experts
+- [ ] Pass license compliance check (CERN-OHL-S export control, OpenMTA material terms)
+- [ ] Tag release `v1.0.0` on GitHub
+- [ ] Publish to relevant communities: Hackster.io, Instructables, OpenBiofoundry, OSE (Open Source Ecology)
+- [ ] Upload large files (STEP/STL) to Git LFS or Zenodo DOI for permanent archival
+
+---
+
+## ⚠️ Open Questions / Blockers
+
+| # | Domain | Issue | Owner |
+|---|---|---|---|
+| OQ-1 | Hardware | All physical dimensions missing from spec (marked with empty values) — need engineering drawings or measurements | Hardware lead |
+| OQ-2 | Software | YOLOv8 biosecurity training dataset does not yet exist | ML / Biology |
+| OQ-3 | Software | PID gains require tuning on live culture — cannot be determined analytically | Software + Biology |
+| OQ-4 | Software | LED PWM exact frequency formula requires CFD angular velocity output | Software + CFD |
+| OQ-5 | CFD | Max allowable shear rate threshold (G_max) for *Chlorella* vulgaris not quantified in spec | CFD + Biology |
+| OQ-6 | Hardware | Top manifold material decision pending (Delrin vs. HDPE) | Hardware lead |
+| OQ-7 | Wetware | Biomass density harvest trigger threshold not specified — needs biological data | Biology |
+| OQ-8 | Wetware | UV-C dose and bag filter micron rating not specified | Biology |

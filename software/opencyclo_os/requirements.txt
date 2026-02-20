@@ -1,0 +1,39 @@
+# ──────────────────────────────────────────────
+# OpenCyclo OS — Python Dependencies
+# ──────────────────────────────────────────────
+# Install: pip install -r requirements.txt
+#
+# Profile: GARAGE (V0.1-Alpha)
+#   Core dependencies only. Runs on any RPi or Linux laptop.
+#   Uncomment the [INDUSTRIAL] section for the full SMU-1000.
+# ──────────────────────────────────────────────
+
+# ── Core (both profiles) ─────────────────────
+opencv-python>=4.8.0,<5.0
+numpy>=1.24.0,<2.0
+simple-pid>=2.0.0,<3.0
+
+# ── Sensor I/O ────────────────────────────────
+# RPi.GPIO is pre-installed on Raspberry Pi OS.
+# On Jetson Nano, replace with Jetson.GPIO.
+# On desktop/laptop for development, use the mock:
+#   pip install fake-rpi
+# RPi.GPIO
+
+# For analog pH sensor via ADS1115 ADC (garage profile)
+adafruit-circuitpython-ads1x15>=2.2.0,<3.0
+adafruit-blinka>=8.0.0,<9.0
+
+# ── Logging & Utilities ──────────────────────
+# stdlib: asyncio, logging, json, signal — no install needed
+
+# ── [INDUSTRIAL] Uncomment for SMU-1000 ──────
+# smbus2>=0.4.0,<1.0               # Atlas Scientific I2C pH probe
+# pymodbus>=3.5.0,<4.0             # RS-485 VFD communication
+# ultralytics>=8.0.0,<9.0          # YOLOv8 biosecurity model
+# aiohttp>=3.9.0,<4.0              # Webhook HTTP client
+
+# ── Development / Testing ────────────────────
+# pytest>=7.4.0
+# pytest-asyncio>=0.21.0
+# fake-rpi>=0.7.0
