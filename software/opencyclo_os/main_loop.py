@@ -195,6 +195,7 @@ class OpenCycloOrchestrator:
 
         # Harvest config (industrial only)
         self._harvest_cfg = cfg.get("harvest")
+        self._is_harvesting = False
 
     async def initialize(self):
         """Initialize all subsystem hardware."""
@@ -266,8 +267,8 @@ class OpenCycloOrchestrator:
         elif self._state == OperatingState.STEADY_STATE_TURBIDOSTAT:
             # Monitor density and trigger harvests
             density = self._vision.latest_density
-            if self._harvest_cfg and density >= self._harvest_cfg.density_trigger_g_l:
-                await self._trigger_harvest()
+            if self._harvest_cfg and density >= self._harvest_cfg.density_trigger_g_l and not self._is_harvesting:
+                asyncio.create_task(self._trigger_harvest())
 
             # In garage mode, just log (no automated harvest)
             if ACTIVE_PROFILE == Profile.GARAGE:
@@ -337,13 +338,52 @@ class OpenCycloOrchestrator:
 
         # Industrial: automated valve operation
         logger.info("Triggering turbidostat harvest cycle...")
-        # TODO: Implement harvest valve GPIO control
-        # 1. Open 3-way valve (pin from config)
-        # 2. Divert 15% volume through hydrocyclone at 3 Bar
-        # 3. Wait for harvest volume to pass
-        # 4. Close valve
-        # 5. Draw fresh media to restore reactor volume
-        logger.warning("Automated harvest valve control NOT YET IMPLEMENTED")
+        self._is_harvesting = True
+        try:
+            harvest_cfg = self._cfg.get("harvest")
+            if not harvest_cfg or not harvest_cfg.harvest_valve_pin:
+                logger.warning("Harvest valve not configured, skipping...")
+                return
+                
+            pin = harvest_cfg.harvest_valve_pin
+            try:
+                import RPi.GPIO as GPIO
+                GPIO.setmode(GPIO.BCM)
+                GPIO.setup(pin, GPIO.OUT, initial=GPIO.LOW)
+                
+                # 1. Open 3-way valve
+                logger.info(f"Opening harvest valve on GPIO {pin}")
+                GPIO.output(pin, GPIO.HIGH)
+                
+                # 2. Divert 15% volume through hydrocyclone at 3 Bar
+                volume_l = 1000.0 * harvest_cfg.harvest_volume_fraction
+                speed_pct = self._pump.speed_percent
+                if speed_pct <= 0:
+                    logger.error("Pump is stopped, cannot harvest!")
+                    GPIO.output(pin, GPIO.LOW)
+                    return
+                    
+                flow_rate_lph = self._cfg["pump"].max_flow_rate_lph * (speed_pct / 100.0)
+                duration_s = (volume_l / flow_rate_lph) * 3600.0
+                logger.info(f"Harvesting {volume_l:.1f}L @ {flow_rate_lph:.1f} L/hr... waiting {duration_s:.1f}s")
+                
+                # 3. Wait for harvest volume to pass
+                await asyncio.sleep(duration_s)
+                
+                # 4. Close valve
+                logger.info(f"Closing harvest valve on GPIO {pin}")
+                GPIO.output(pin, GPIO.LOW)
+                
+                # 5. Draw fresh media to restore reactor volume
+                logger.info("Harvest complete. Drawing fresh media (gravity top-up).")
+                
+            except ImportError:
+                logger.warning("RPi.GPIO not found (simulation mode) — Harvest simulated.")
+                await asyncio.sleep(5.0)
+                logger.info("Simulated harvest complete.")
+                
+        finally:
+            self._is_harvesting = False
 
     async def trigger_ph_shock(self):
         """

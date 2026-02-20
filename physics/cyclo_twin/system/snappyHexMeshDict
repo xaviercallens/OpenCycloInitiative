@@ -1,0 +1,177 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  10
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    format      ascii;
+    class       dictionary;
+    object      snappyHexMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Which of the steps to run
+castellatedMesh true;
+snap            true;
+addLayers       true;
+
+// Geometry. Definition of all surfaces.
+geometry
+{
+    // The main vortex base cone + cylinder CAD model
+    vessel.stl
+    {
+        type triSurfaceMesh;
+        name PC_Vessel;
+    }
+
+    // Refinement cylinders for vortex core and sparger
+    vortexCore
+    {
+        type searchableCylinder;
+        point1 (0 0 0);
+        point2 (0 0 4.3); // Tank height
+        radius 0.05;      // 5cm core radius
+    }
+
+    spargerRegion
+    {
+        type searchableCylinder;
+        point1 (0 0 0);
+        point2 (0 0 0.2); // Bottom region
+        radius 0.15;
+    }
+}
+
+// Settings for the castellatedMesh generation.
+castellatedMeshControls
+{
+    // Refinement parameters and limit
+    maxLocalCells 1000000;
+    maxGlobalCells 3000000;  // Target: ~3 million cells
+    minRefinementCells 10;
+    maxLoadUnbalance 0.10;
+    nCellsBetweenLevels 2;
+
+    // Explicit feature edge refinement
+    features
+    (
+        {
+            file "vessel.eMesh";
+            level 3;
+        }
+    );
+
+    // Surface based refinement
+    refinementSurfaces
+    {
+        PC_Vessel
+        {
+            // Surface-wise min and max refinement level
+            level (2 3);
+
+            // Refinement specifically on tangential inlet (assuming patch names inside STL)
+            regions
+            {
+                .*inlet.*
+                {
+                    level (3 4);
+                }
+            }
+        }
+    }
+
+    // Resolve sharp angles
+    resolveFeatureAngle 30;
+
+    // Regional refinement within defined volumes
+    refinementRegions
+    {
+        vortexCore
+        {
+            mode inside;
+            level 3;
+        }
+        spargerRegion
+        {
+            mode inside;
+            level 2;
+        }
+    }
+
+    // A point inside the region to be meshed (must be inside the vessel)
+    locationInMesh (0.01 0.01 2.0);
+    allowFreeStandingZoneFaces true;
+}
+
+// Settings for the snapping.
+snapControls
+{
+    nSmoothPatch 3;
+    tolerance 2.0;
+    nSolveIter 30;
+    nRelaxIter 5;
+    nFeatureSnapIter 10;
+    implicitFeatureSnap false;
+    explicitFeatureSnap true;
+    multiRegionFeatureSnap false;
+}
+
+// Settings for the layer addition.
+addLayersControls
+{
+    relativeSizes true;
+    layers
+    {
+        // 5-layer prism boundary layer at polycarbonate wall (y+ target: < 1)
+        PC_Vessel
+        {
+            nSurfaceLayers 5;
+        }
+    }
+
+    expansionRatio 1.2;
+    finalLayerThickness 0.3;
+    minThickness 0.1;
+    nGrow 0;
+
+    featureAngle 60;
+    slipFeatureAngle 30;
+    nRelaxIter 3;
+    nSmoothSurfaceNormals 1;
+    nSmoothNormals 3;
+    nSmoothThickness 10;
+    maxFaceThicknessRatio 0.5;
+    maxThicknessToMedialRatio 0.3;
+    minMedianAxisAngle 90;
+    nBufferCellsNoExtrude 0;
+    nLayerIter 50;
+}
+
+// Generic mesh quality settings
+meshQualityControls
+{
+    maxNonOrtho 65;
+    maxBoundarySkewness 20;
+    maxInternalSkewness 4;
+    maxConcave 80;
+    minVol 1e-13;
+    minTetQuality 1e-30;
+    minArea -1;
+    minTwist 0.01;
+    minDeterminant 0.001;
+    minFaceWeight 0.02;
+    minVolRatio 0.01;
+    minTriangleTwist -1;
+    nSmoothScale 4;
+    errorReduction 0.75;
+}
+
+// Advanced
+debug 0;
+mergeTolerance 1e-6;
+
+// ************************************************************************* //

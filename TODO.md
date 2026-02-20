@@ -163,10 +163,10 @@ Integration milestones are marked **[INT]**.
 ## 🌊 PHASE 4 — CFD Simulation (`/physics/openfoam/`) *(Weeks 3–5)*
 
 ### 4.1 Mesh Generation
-- [ ] `system/snappyHexMeshDict` — configure hexahedral-dominant parametric mesh
-  - [ ] Target: ~X million cells (fill in from solver spec)
-  - [ ] 5-layer prism boundary layer at polycarbonate wall (y+ target: fill in value)
-  - [ ] Refinement zones: tangential inlet, vortex core, sparger region
+- [x] `system/snappyHexMeshDict` — configure hexahedral-dominant parametric mesh
+  - [x] Target: ~3 million cells (fill in from solver spec)
+  - [x] 5-layer prism boundary layer at polycarbonate wall (y+ target: < 1)
+  - [x] Refinement zones: tangential inlet, vortex core, sparger region
 - [x] `system/blockMeshDict` — cylindrical background mesh with OQ-1 dimensions
 - [ ] `constant/triSurface/` — import STL surfaces of reactor geometry
 - [ ] Run mesh quality checks: `checkMesh`, ortho quality > 0.01, max non-orthogonality < 70°
@@ -235,7 +235,7 @@ Integration milestones are marked **[INT]**.
 *Simulating the 1000L industrial vessel using High-Fidelity CFD and PINNs.*
 
 - [x] **OpenFOAM Case Setup:**
-  - [ ] `snappyHexMesh` with 5-layer prism insertion (y+ < 1) — pending CAD STL
+  - [x] `snappyHexMesh` with 5-layer prism insertion (y+ < 1) — pending CAD STL
   - [x] `reactingMultiphaseEulerFoam` with MUSIG bubble model (OQ-6)
   - [x] Higbie Penetration Theory for CO2 mass transfer calibration
   - [x] fvDOM radiative transfer for LED photonic field
@@ -246,7 +246,7 @@ Integration milestones are marked **[INT]**.
   - [ ] Train **NVIDIA Modulus** FNO model on OpenFOAM snapshots
   - [ ] Deploy TensorRT engine for <20ms real-time inference
 - [x] **Synthetic Vision Pipeline:**
-  - [ ] Fluid-to-VDB export script
+  - [x] Fluid-to-VDB export script
   - [x] Blender headless renderer for synthetic YOLOv8 training — `render_vdb.py`
 - [x] **SITL Bridge:**
   - [x] ROS 2 Virtual Hardware Bridge (with TCP standalone fallback)

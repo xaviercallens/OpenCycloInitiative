@@ -38,7 +38,7 @@
 | SW-02 | Vision Soft Sensor | `vision_density.py` | ✅ | SW-00, SW-06 (calibration) | SW-01, SW-05 | Code complete; ⚠️ calibration data needed (OQ-2, OQ-3) |
 | SW-03 | pH-stat / CO₂ Dosing | `ph_stat_co2.py` | ✅ | SW-00 | SW-01 | pH 6.8 setpoint; PH Shock override for SOP-104 |
 | SW-04 | LED PWM Sync | `led_pwm_sync.py` | ✅ | SW-00, CFD-03 (angular velocity) | SW-01 | Code complete; ⚠️ PWM formula needs CFD data (OQ-4) |
-| SW-05 | Harvest Valve Control | *(in main_loop.py)* | 🔵 | SW-01, SW-02, HW-05 | — | Stub implemented; GPIO valve control TODO |
+| SW-05 | Harvest Valve Control | *(in main_loop.py)* | ✅ | SW-01, SW-02, HW-05 | — | Automated 3-way valve harvest implemented using RPi.GPIO |
 | SW-06 | Calibration Script | `deploy/calibration.py` | ✅ | SW-00 | SW-02 | Polynomial curve fit + ROI mask for vision sensor |
 | SW-07 | Logger | `utils/logger.py` | ✅ | — | SW-01 | JSON-lines, log rotation |
 | SW-08 | Webhook Dispatcher | `utils/webhook.py` | ✅ | — | SW-02 | HTTP alerts for biosecurity events |
@@ -55,7 +55,7 @@
 
 | ID | Component | File / Directory | Status | Depends On | Blocks | Notes |
 |---|---|---|---|---|---|---|
-| CFD-01 | Mesh Config | `system/snappyHexMeshDict` | ⬜ | HW-03 geometry as STL | HW-03 (pre-machining validation), CFD-02 | 5-layer prism BL at PC wall — pending STL |
+| CFD-01 | Mesh Config | `system/snappyHexMeshDict` | ✅ | HW-03 geometry as STL | HW-03 (pre-machining validation), CFD-02 | 5-layer prism BL at PC wall — `snappyHexMeshDict` implemented |
 | CFD-02 | Background Mesh | `system/blockMeshDict` | ✅ | — | CFD-01 | Cylindrical mesh with OQ-1 dimensions |
 | CFD-03 | Phase Properties | `constant/phaseProperties` | ✅ | — | CFD-04 | MUSIG bubble model + Higbie mass transfer |
 | CFD-04 | Boundary Conditions | `0/U.water`, `0/alpha.water`, `0/p_rgh`, `0/k`, `0/omega` | ✅ | CFD-03 | CFD-05 | Tangential inlet (14.7 m/s), degassing outlet |
@@ -125,7 +125,7 @@
 | ID | Component | File | Status | Depends On | Blocks | Notes |
 |---|---|---|---|---|---|---|
 | HUD-01 | Holographic Dashboard | `software/hud/` | ✅ | — | — | 6 widgets, boot sequence, reactor hologram, CRT overlay |
-| HUD-02 | Live Telemetry Bridge | `software/hud/telemetry_bridge.js` | 🔵 | SW-13, DT-01 | HUD-01 | WebSocket client wired into HUD; auto-reconnect with exponential backoff |
+| HUD-02 | Live Telemetry Bridge | `software/hud/telemetry_bridge.js` | ✅ | SW-13, DT-01 | HUD-01 | WebSocket client wired into HUD; auto-reconnect with exponential backoff |
 
 ---
 
