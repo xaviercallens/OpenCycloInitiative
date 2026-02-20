@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C.Y.C.L.O.S. — Cognitive Yield & Carbon Logistics Operating System</title>
+    <meta name="description"
+        content="Holographic HUD command center for the OpenCyclo AI-driven algae bioreactor. Real-time digital twin visualization.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&family=Fira+Code:wght@300;400;500&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="hud.css">
+</head>
+
+<body>
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- BOOT SEQUENCE OVERLAY -->
+    <!-- ═══════════════════════════════════════════ -->
+    <div id="boot-overlay" class="boot-overlay">
+        <div class="boot-scanline" id="boot-scanline"></div>
+        <div class="boot-hex-grid" id="boot-hex"></div>
+        <div class="boot-terminal" id="boot-terminal"></div>
+        <div class="boot-status" id="boot-status">INITIALIZING</div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- MAIN HUD -->
+    <!-- ═══════════════════════════════════════════ -->
+    <div id="hud-container" class="hud-container hidden">
+
+        <!-- HEX GRID BACKGROUND -->
+        <canvas id="hex-grid-bg" class="hex-grid-bg"></canvas>
+
+        <!-- TOP BAR -->
+        <header class="hud-topbar">
+            <div class="topbar-left">
+                <span class="topbar-logo">C.Y.C.L.O.S.</span>
+                <span class="topbar-sub">COGNITIVE YIELD & CARBON LOGISTICS OPERATING SYSTEM</span>
+            </div>
+            <div class="topbar-center" id="topbar-uplink">
+                <span class="uplink-dot"></span>
+                <span>UPLINK SECURED</span>
+            </div>
+            <div class="topbar-right">
+                <span id="clock" class="topbar-clock">00:00:00</span>
+                <span class="topbar-node">NODE: CONTES-α</span>
+            </div>
+        </header>
+
+        <!-- ═══════════════════════════════════════════ -->
+        <!-- THREE-COLUMN LAYOUT -->
+        <!-- ═══════════════════════════════════════════ -->
+        <main class="hud-main">
+
+            <!-- LEFT WING: Fluid Kinematics & Hardware -->
+            <section class="hud-wing hud-left" id="wing-left">
+
+                <!-- Widget A: Phase-Lock Ring -->
+                <div class="widget" id="widget-phase-lock">
+                    <div class="widget-header">
+                        <span class="widget-icon">☢️</span>
+                        <span class="widget-title">PHASE-LOCK SYNC</span>
+                    </div>
+                    <div class="phase-lock-container">
+                        <canvas id="phase-lock-canvas" width="260" height="260"></canvas>
+                        <div class="phase-lock-center">
+                            <div class="phase-lock-value" id="fle-value">98.7%</div>
+                            <div class="phase-lock-label">FLE EFFICIENCY</div>
+                        </div>
+                    </div>
+                    <div class="widget-readout" id="phase-lock-readout">
+                        PHASE LOCK: <span class="val-cyan">99.8%</span> FLE // ENERGY DRAW <span
+                            class="val-emerald">-47%</span>
+                    </div>
+                </div>
+
+                <!-- Widget B: Shear Stress Monitor -->
+                <div class="widget" id="widget-shear">
+                    <div class="widget-header">
+                        <span class="widget-icon">⚙️</span>
+                        <span class="widget-title">SHEAR STRESS (G_max)</span>
+                    </div>
+                    <canvas id="shear-canvas" width="340" height="120"></canvas>
+                    <div class="widget-readout">
+                        MAX SHEAR: <span class="val-cyan" id="shear-value">1,240</span> s⁻¹ // <span
+                            class="val-emerald">CELLULAR LYSIS AVOIDED</span>
+                    </div>
+                </div>
+
+                <!-- Widget C: Nanobubble Array -->
+                <div class="widget" id="widget-nanobubble">
+                    <div class="widget-header">
+                        <span class="widget-icon">💨</span>
+                        <span class="widget-title">NANOBUBBLE PENETRATION</span>
+                    </div>
+                    <canvas id="nanobubble-canvas" width="340" height="140"></canvas>
+                    <div class="widget-readout">
+                        k<sub>L</sub>a: <span class="val-cyan" id="kla-value">135</span> h⁻¹ // OUTGASSING: <span
+                            class="val-emerald">ZERO</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CENTER: Holographic Digital Twin -->
+            <section class="hud-center" id="hud-center">
+                <canvas id="reactor-canvas"></canvas>
+                <div class="reactor-ring" id="reactor-ring">
+                    <div class="ring-text">
+                        NODE ALIVE // LAT: 43.8113° N | LON: 7.3167° E // CONTES, FRANCE SECURED
+                    </div>
+                </div>
+                <div class="reactor-stats">
+                    <div class="stat">
+                        <div class="stat-value" id="stat-rpm">3,400</div>
+                        <div class="stat-label">VORTEX RPM</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value val-emerald" id="stat-density">6.84</div>
+                        <div class="stat-label">BIOMASS g/L</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value" id="stat-ph">6.80</div>
+                        <div class="stat-label">pH LEVEL</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value" id="stat-temp">24.1</div>
+                        <div class="stat-label">TEMP °C</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- RIGHT WING: AI Vision & Biokinetics -->
+            <section class="hud-wing hud-right" id="wing-right">
+
+                <!-- Widget D: YOLOv8 Vision Feed -->
+                <div class="widget" id="widget-vision">
+                    <div class="widget-header">
+                        <span class="widget-icon">🎯</span>
+                        <span class="widget-title">BIOSECURITY TARGETING</span>
+                    </div>
+                    <div class="vision-feed" id="vision-feed">
+                        <canvas id="vision-canvas" width="340" height="200"></canvas>
+                        <div class="vision-status" id="vision-status">
+                            <span class="val-emerald">■</span> ALL CLEAR — NO THREATS DETECTED
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Widget E: Plastoquinone State Matrix -->
+                <div class="widget" id="widget-han">
+                    <div class="widget-header">
+                        <span class="widget-icon">🧬</span>
+                        <span class="widget-title">PLASTOQUINONE STATE MATRIX</span>
+                    </div>
+                    <div class="han-matrix">
+                        <div class="han-node" id="han-x1">
+                            <div class="han-hex"></div>
+                            <div class="han-value">12%</div>
+                            <div class="han-label">x₁ READY</div>
+                        </div>
+                        <div class="han-connector"></div>
+                        <div class="han-node han-active" id="han-x2">
+                            <div class="han-hex"></div>
+                            <div class="han-value">87%</div>
+                            <div class="han-label">x₂ PROCESSING</div>
+                        </div>
+                        <div class="han-connector"></div>
+                        <div class="han-node" id="han-x3">
+                            <div class="han-hex"></div>
+                            <div class="han-value">1%</div>
+                            <div class="han-label">x₃ DAMAGED</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Widget F: Growth Curve -->
+                <div class="widget" id="widget-growth">
+                    <div class="widget-header">
+                        <span class="widget-icon">📈</span>
+                        <span class="widget-title">LOGARITHMIC GROWTH CURVE</span>
+                    </div>
+                    <canvas id="growth-canvas" width="340" height="140"></canvas>
+                    <div class="widget-readout">
+                        BIOMASS: <span class="val-emerald" id="growth-density">6.84</span> g/L — <span
+                            class="val-cyan">EXPONENTIAL OVERDRIVE</span>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- ═══════════════════════════════════════════ -->
+        <!-- FOOTER: Planetary Impact -->
+        <!-- ═══════════════════════════════════════════ -->
+        <footer class="hud-footer">
+            <!-- Carbon Ticker -->
+            <div class="footer-section footer-ticker">
+                <div class="ticker-label">TOTAL CO₂ SEQUESTERED</div>
+                <div class="ticker-value" id="co2-ticker">0,042.853</div>
+                <div class="ticker-unit">KG</div>
+            </div>
+
+            <!-- AI Waveform -->
+            <div class="footer-section footer-waveform">
+                <canvas id="waveform-canvas" width="400" height="60"></canvas>
+                <div class="waveform-label">C.Y.C.L.O.S. COGNITIVE ENGINE</div>
+            </div>
+
+            <!-- Action Terminal -->
+            <div class="footer-section footer-terminal">
+                <div class="terminal-feed" id="terminal-feed">
+                    <div class="terminal-line">> [SYS] C.Y.C.L.O.S. v2.0 initialized</div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- CRT Overlay -->
+    <div class="crt-overlay"></div>
+
+    <script src="hud.js"></script>
+</body>
+
+</html>
