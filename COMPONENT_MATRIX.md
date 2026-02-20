@@ -91,8 +91,9 @@
 | CE-04 | Reality Sync Module | `cyclo_earth.py` | ✅ | CE-01 | CE-05 | SvR (Simulation vs Reality) index |
 | CE-05 | MQTT Telemetry Ingestion | `mqtt_ingest.py` | ✅ | — | CE-04 | Subscribes to `opencyclo/+/{status,co2,density}` |
 | CE-06 | FastAPI Backend | `api.py` | ✅ | CE-01–05 | — | REST API for frontend + WebSocket globe stream |
-| CE-07 | Web Frontend (Globe) | *(planned — Next.js + Globe.gl)* | ⬜ | CE-06 | — | 3D WebGL Earth + slider control deck |
+| CE-07 | Web Frontend (Globe) | `software/cyclo_earth_web/` | ✅ | CE-06 | — | Procedural 3D WebGL Earth + 3-lever control deck + scoreboard + Golden Cross |
 | CE-08 | Hector Wasm Build | *(planned)* | ⬜ | — | CE-07 | C++ → WebAssembly for browser-side climate math |
+| CE-09 | Browser Climate Model | `software/cyclo_earth_web/genesis.js` | ✅ | CE-01 | CE-07 | Hector-lite in JS — PSC fluxes + ECS + timeline chart |
 
 ---
 
@@ -105,6 +106,26 @@
 | WT-03 | Turbidostat Harvesting SOP | `SOP-103_Turbidostat_Harvesting.md` | ✅ | WT-02, SW-02 (vision trigger) | — | 4 g/L garage, 6 g/L industrial; hydrocyclone + siphon |
 | WT-04 | Contamination / Biosecurity SOP | `SOP-104_Contamination_Biosecurity.md` | ✅ | WT-02, SW-03 (pH override) | — | pH Shock: pH 4.5 for 4h; 48h recovery protocol |
 | WT-05 | Strain Registry | `STRAIN_REGISTRY.md` | ✅ | — | WT-02 | Template ready; UTEX 2714 tracking |
+
+---
+
+## 🔧 Domain 6 — Garage Hacker Prototype (V0.1)
+
+| ID | Component | File | Status | Depends On | Blocks | Notes |
+|---|---|---|---|---|---|---|
+| GP-01 | pH-Stat Control Loop | `software/garage_v01/ph_stat_loop.py` | ✅ | — | — | ADS1115 ADC + CO₂ solenoid + hysteresis band; full sim mode |
+| GP-02 | Vision Growth Tracker | `software/garage_v01/vision_growth_tracker.py` | ✅ | — | — | Green saturation proxy, ASCII charts, CSV export |
+| GP-03 | LED PWM Energy Saver | `software/garage_v01/led_pwm_energy_saver.py` | ✅ | — | — | 50 Hz / 50% duty FLE exploit; frequency sweep mode |
+| GP-04 | Garage README | `software/garage_v01/README.md` | ✅ | GP-01–03 | — | BOM, usage instructions, expected results |
+
+---
+
+## 🖥️ Domain 7 — C.Y.C.L.O.S. HUD
+
+| ID | Component | File | Status | Depends On | Blocks | Notes |
+|---|---|---|---|---|---|---|
+| HUD-01 | Holographic Dashboard | `software/hud/` | ✅ | — | — | 6 widgets, boot sequence, reactor hologram, CRT overlay |
+| HUD-02 | Live Telemetry Bridge | *(planned)* | ⬜ | SW-13, DT-01 | HUD-01 | WebSocket link to real-time telemetry API |
 
 ---
 
@@ -146,9 +167,11 @@
 | CFD Simulation | 10 | 7 | 0 | 0 | 3 |
 | Digital Twin / SITL | 6 | 4 | 0 | 0 | 2 |
 | Wetware / SOPs | 5 | 5 | 0 | 0 | 0 |
-| Cyclo-Earth | 8 | 6 | 0 | 0 | 2 |
+| Cyclo-Earth | 9 | 8 | 0 | 0 | 1 |
+| Garage Prototype | 4 | 4 | 0 | 0 | 0 |
+| C.Y.C.L.O.S. HUD | 2 | 1 | 0 | 0 | 1 |
 | Integration Points | 7 | 0 | 0 | 3 | 4 |
-| **TOTAL** | **57** | **34** | **1** | **3** | **19** |
+| **TOTAL** | **64** | **41** | **1** | **3** | **19** |
 
 ---
 

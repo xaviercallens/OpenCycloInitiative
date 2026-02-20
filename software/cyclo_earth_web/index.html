@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyclo-Earth — Project Genesis | Planetary Symbiosis Simulator</title>
+    <meta name="description"
+        content="Interactive 3D Earth simulator showing how scaling open-source cycloreactors can reverse global warming by 2050. Move the sliders. Heal the planet.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&family=Fira+Code:wght@300;400;500&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="genesis.css">
+</head>
+
+<body>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- LOADING OVERLAY -->
+    <!-- ═══════════════════════════════════════════ -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="loader-ring"></div>
+        <div class="loader-text">INITIALIZING EARTH SYSTEM MODEL</div>
+        <div class="loader-sub" id="loader-status">Loading climate baseline...</div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- MAIN APPLICATION -->
+    <!-- ═══════════════════════════════════════════ -->
+    <div id="app" class="app hidden">
+
+        <!-- 3D GLOBE CANVAS -->
+        <canvas id="globe-canvas"></canvas>
+
+        <!-- ATMOSPHERIC HAZE OVERLAY -->
+        <div class="atmosphere-overlay" id="atmo-overlay"></div>
+
+        <!-- ═══════════════════════════════════════════ -->
+        <!-- TOP: REALITY SYNC BEACON -->
+        <!-- ═══════════════════════════════════════════ -->
+        <div class="reality-sync" id="reality-sync">
+            <div class="sync-beacon"></div>
+            <div class="sync-info">
+                <div class="sync-location">📍 LIVE ALPHA NODE: CONTES, FRANCE</div>
+                <div class="sync-status">Status: <span class="val-cyan">Active Vortex (3,400 RPM)</span></div>
+                <div class="sync-co2">CO₂ Extracted Today: <span class="val-emerald" id="live-co2">42.58</span> kg</div>
+            </div>
+            <div class="sync-chart">
+                <canvas id="sync-chart-canvas" width="200" height="60"></canvas>
+                <div class="sync-legend">
+                    <span class="legend-sim">--- Simulated</span>
+                    <span class="legend-real">━━ Measured</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════ -->
+        <!-- LEFT: CONTROL DECK -->
+        <!-- ═══════════════════════════════════════════ -->
+        <div class="control-deck" id="control-deck">
+            <h2 class="deck-title">THE CONTROL DECK</h2>
+            <p class="deck-sub">"What if we actually tried?"</p>
+
+            <!-- Lever 1: Deploy Cycloreactors -->
+            <div class="lever" id="lever-reactors">
+                <div class="lever-header">
+                    <span class="lever-icon">🏭</span>
+                    <span class="lever-name">Deploy Cycloreactors</span>
+                </div>
+                <p class="lever-sub">Replace industrial smokestacks with AI algae scrubbers.</p>
+                <div class="lever-slider-wrap">
+                    <input type="range" id="slider-reactors" class="lever-slider slider-cyan" min="0" max="100"
+                        value="0" step="1">
+                    <div class="lever-ticks">
+                        <span>1 Unit</span>
+                        <span>100M Nodes</span>
+                    </div>
+                </div>
+                <div class="lever-value" id="val-reactors">1 Garage Unit</div>
+            </div>
+
+            <!-- Lever 2: Biochar Soil Regeneration -->
+            <div class="lever" id="lever-biochar">
+                <div class="lever-header">
+                    <span class="lever-icon">🌱</span>
+                    <span class="lever-name">Biochar Soil Regeneration</span>
+                </div>
+                <p class="lever-sub">Bury captured carbon to heal dead farmland.</p>
+                <div class="lever-slider-wrap">
+                    <input type="range" id="slider-biochar" class="lever-slider slider-emerald" min="0" max="100"
+                        value="0" step="1">
+                    <div class="lever-ticks">
+                        <span>0 Ha</span>
+                        <span>500M Ha</span>
+                    </div>
+                </div>
+                <div class="lever-value" id="val-biochar">0 Hectares</div>
+            </div>
+
+            <!-- Lever 3: Reforestation -->
+            <div class="lever" id="lever-reforest">
+                <div class="lever-header">
+                    <span class="lever-icon">💧</span>
+                    <span class="lever-name">Solar Desalination & Reforestation</span>
+                </div>
+                <p class="lever-sub">Use solar-powered water to turn deserts green.</p>
+                <div class="lever-slider-wrap">
+                    <input type="range" id="slider-reforest" class="lever-slider slider-green" min="0" max="100"
+                        value="0" step="1">
+                    <div class="lever-ticks">
+                        <span>0 Trees</span>
+                        <span>1T Trees</span>
+                    </div>
+                </div>
+                <div class="lever-value" id="val-reforest">0 Trees</div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════ -->
+        <!-- RIGHT: EASY METRICS SCOREBOARD -->
+        <!-- ═══════════════════════════════════════════ -->
+        <div class="scoreboard" id="scoreboard">
+            <!-- Temperature -->
+            <div class="score-card" id="card-temp">
+                <div class="score-icon">🌡️</div>
+                <div class="score-content">
+                    <div class="score-value" id="score-temp">+1.8</div>
+                    <div class="score-unit">°C</div>
+                    <div class="score-label">Global Temperature</div>
+                    <div class="score-sub">Keeping the planet livable.</div>
+                </div>
+                <div class="score-bar">
+                    <div class="score-bar-fill" id="bar-temp" style="width: 65%"></div>
+                </div>
+            </div>
+
+            <!-- CO₂ Level -->
+            <div class="score-card" id="card-co2">
+                <div class="score-icon">☁️</div>
+                <div class="score-content">
+                    <div class="score-value" id="score-co2">425</div>
+                    <div class="score-unit">PPM</div>
+                    <div class="score-label">Atmospheric CO₂</div>
+                    <div class="score-sub">Breathing easier.</div>
+                </div>
+                <div class="score-bar">
+                    <div class="score-bar-fill score-bar-amber" id="bar-co2" style="width: 72%"></div>
+                </div>
+            </div>
+
+            <!-- Golden Cross -->
+            <div class="score-card golden-cross-card" id="card-golden">
+                <div class="score-icon">⚖️</div>
+                <div class="score-content">
+                    <div class="score-value golden-cross-value" id="score-golden">NEVER</div>
+                    <div class="score-label">Net-Zero Year</div>
+                    <div class="score-sub">The "Golden Cross" — when we start healing.</div>
+                </div>
+            </div>
+
+            <!-- Timeline Chart -->
+            <div class="score-card timeline-card">
+                <canvas id="timeline-canvas" width="340" height="130"></canvas>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════ -->
+        <!-- GOLDEN CROSS CELEBRATION -->
+        <!-- ═══════════════════════════════════════════ -->
+        <div class="golden-popup hidden" id="golden-popup">
+            <div class="golden-text">PLANETARY SYMBIOSIS ACHIEVED.<br>WARMING HALTED.</div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════ -->
+        <!-- FOOTER: CTA -->
+        <!-- ═══════════════════════════════════════════ -->
+        <div class="footer-cta" id="footer-cta">
+            <a href="https://github.com/xaviercallens/OpenCycloInitiative" target="_blank" class="cta-button">
+                VIEW OPEN-SOURCE BLUEPRINTS. BUILD A REACTOR.
+            </a>
+        </div>
+    </div>
+
+    <script src="genesis.js"></script>
+</body>
+
+</html>
