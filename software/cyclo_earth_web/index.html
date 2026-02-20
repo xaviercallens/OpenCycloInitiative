@@ -38,22 +38,29 @@
         <div class="atmosphere-overlay" id="atmo-overlay"></div>
 
         <!-- ═══════════════════════════════════════════ -->
-        <!-- TOP: REALITY SYNC BEACON -->
+        <!-- TOP/CENTER: HERO OVERLAY -->
         <!-- ═══════════════════════════════════════════ -->
-        <div class="reality-sync" id="reality-sync">
-            <div class="sync-beacon"></div>
-            <div class="sync-info">
-                <div class="sync-location">📍 LIVE ALPHA NODE: CONTES, FRANCE</div>
-                <div class="sync-status">Status: <span class="val-cyan">Active Vortex (3,400 RPM)</span></div>
-                <div class="sync-co2">CO₂ Extracted Today: <span class="val-emerald" id="live-co2">42.58</span> kg</div>
-            </div>
-            <div class="sync-chart">
-                <canvas id="sync-chart-canvas" width="200" height="60"></canvas>
-                <div class="sync-legend">
-                    <span class="legend-sim">--- Simulated</span>
-                    <span class="legend-real">━━ Measured</span>
+        <div class="hero-header" id="hero-header">
+            <h1 class="hero-title">WE ARE RE-ENGINEERING THE CARBON CYCLE.</h1>
+
+            <div class="reality-sync" id="reality-sync">
+                <div class="sync-beacon"></div>
+                <div class="sync-info">
+                    <div class="sync-location">📍 LIVE ALPHA NODE: CONTES, FRANCE</div>
+                    <div class="sync-status">Status: <span class="val-cyan">Active Vortex (3,400 RPM)</span></div>
+                    <div class="sync-co2">CO₂ Extracted Today: <span class="val-emerald" id="live-co2">42.58</span> kg
+                    </div>
+                </div>
+                <div class="sync-chart">
+                    <canvas id="sync-chart-canvas" width="200" height="60"></canvas>
+                    <div class="sync-legend">
+                        <span class="legend-sim">--- Simulated</span>
+                        <span class="legend-real">━━ Measured</span>
+                    </div>
                 </div>
             </div>
+
+            <button class="cta-button hero-btn" id="initiate-btn">INITIATE PLANETARY SYMBIOSIS</button>
         </div>
 
         <!-- ═══════════════════════════════════════════ -->

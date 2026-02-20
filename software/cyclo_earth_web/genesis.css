@@ -146,12 +146,51 @@ body {
     background: radial-gradient(ellipse at center, transparent 40%, rgba(0, 255, 102, 0.06) 100%);
 }
 
-/* ─── REALITY SYNC (Top Left) ─── */
-.reality-sync {
+/* ─── HERO HEADER (Top/Center) ─── */
+.hero-header {
     position: absolute;
-    top: 20px;
-    left: 20px;
-    z-index: 10;
+    top: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    width: 100%;
+}
+
+.hero-title {
+    font-family: var(--font-display);
+    font-size: clamp(24px, 4vw, 42px);
+    font-weight: 900;
+    letter-spacing: 5px;
+    color: var(--cyan);
+    text-shadow: var(--glow-cyan);
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.hero-btn {
+    font-size: 16px;
+    letter-spacing: 4px;
+    padding: 16px 40px;
+    background: rgba(0, 229, 255, 0.05);
+    border: 2px solid var(--cyan);
+    color: var(--cyan);
+    text-shadow: var(--glow-cyan);
+    box-shadow: var(--glow-cyan);
+    cursor: pointer;
+}
+
+.hero-btn:hover {
+    background: var(--cyan);
+    color: var(--void);
+    box-shadow: 0 0 30px var(--cyan-glow);
+}
+
+/* ─── REALITY SYNC ─── */
+.reality-sync {
     display: flex;
     align-items: flex-start;
     gap: 14px;

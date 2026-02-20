@@ -681,6 +681,17 @@
                     document.getElementById(id).addEventListener('input', onSliderChange);
                 });
 
+                // Bind Initiate Button
+                const initiateBtn = document.getElementById('initiate-btn');
+                if (initiateBtn) {
+                    initiateBtn.addEventListener('click', () => {
+                        const heroHeader = document.getElementById('hero-header');
+                        heroHeader.style.transition = 'opacity 1s ease';
+                        heroHeader.style.opacity = '0';
+                        setTimeout(() => heroHeader.classList.add('hidden'), 1000);
+                    });
+                }
+
                 // Start render loop
                 requestAnimationFrame(render);
             }, 500);
