@@ -1,0 +1,48 @@
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volScalarField;
+    location    "0";
+    object      k.water;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Turbulent kinetic energy (k) for the water phase
+//
+// For inlet: k = 1.5 * (I * U)² where I = turbulence intensity ≈ 5%
+// U_inlet = 14.7 m/s → k = 1.5 * (0.05 * 14.7)² ≈ 0.81 m²/s²
+// ──────────────────────────────────────────────────────────────────────────
+
+dimensions      [0 2 -2 0 0 0 0];
+
+internalField   uniform 0.01;  // Low initial turbulence
+
+boundaryField
+{
+    walls
+    {
+        type            kqRWallFunction;
+        value           uniform 0.01;
+    }
+
+    inlet
+    {
+        type            fixedValue;
+        value           uniform 0.81;
+    }
+
+    outlet
+    {
+        type            inletOutlet;
+        inletValue      uniform 0.01;
+        value           uniform 0.01;
+    }
+
+    drain
+    {
+        type            kqRWallFunction;
+        value           uniform 0.01;
+    }
+}
+
+// ************************************************************************* //

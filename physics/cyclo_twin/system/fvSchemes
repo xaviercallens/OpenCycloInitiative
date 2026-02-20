@@ -1,0 +1,71 @@
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      fvSchemes;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// OpenCyclo CycloTwin — Numerical Schemes
+//
+// Key considerations for cyclonic/swirling flow:
+//   - Gauss MUSCL for divergence (prevents numerical diffusion of vortex)
+//   - Gauss linear corrected for Laplacian (handles non-orthogonal cells)
+// ──────────────────────────────────────────────────────────────────────────
+
+ddtSchemes
+{
+    default         Euler;
+}
+
+gradSchemes
+{
+    default         Gauss linear;
+    grad(U.water)   cellLimited Gauss linear 1;
+    grad(U.gas)     cellLimited Gauss linear 1;
+}
+
+divSchemes
+{
+    default                         none;
+
+    // Phase velocities — MUSCL for vortex preservation
+    div(phi,alpha.water)            Gauss vanLeer;
+    div(phi,alpha.gas)              Gauss vanLeer;
+    div(phir,alpha.water)           Gauss vanLeer;
+    div(phir,alpha.gas)             Gauss vanLeer;
+
+    div(alphaRhoPhi.water,U.water)  Gauss MUSCL;
+    div(alphaRhoPhi.gas,U.gas)      Gauss MUSCL;
+
+    // Turbulence
+    div(alphaRhoPhi.water,k.water)      Gauss upwind;
+    div(alphaRhoPhi.water,omega.water)  Gauss upwind;
+
+    // Population balance
+    "div\(alphaRhoPhi.gas,f.*\)"    Gauss upwind;
+
+    // Additional required divergence schemes
+    div(phi.water,U.water)          Gauss MUSCL;
+    div(phi.gas,U.gas)              Gauss MUSCL;
+    div(((alpha.water*nuEff.water)*dev2(T(grad(U.water)))))  Gauss linear;
+    div(((alpha.gas*nuEff.gas)*dev2(T(grad(U.gas)))))        Gauss linear;
+}
+
+laplacianSchemes
+{
+    default         Gauss linear corrected;
+}
+
+interpolationSchemes
+{
+    default         linear;
+}
+
+snGradSchemes
+{
+    default         corrected;
+}
+
+// ************************************************************************* //

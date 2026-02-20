@@ -1,0 +1,170 @@
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "constant";
+    object      phaseProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// OpenCyclo CycloTwin — Multiphase Phase Properties
+// Solver: reactingMultiphaseEulerFoam
+// Phases: water (continuous) + CO2 gas (dispersed nanobubbles)
+//
+// Engineering specs: OQ-3 (pump flow), OQ-6 (sparger VVM)
+// ──────────────────────────────────────────────────────────────────────────
+
+type populationBalanceMultiphaseSystem;
+
+phases (water gas);
+
+populationBalances (bubbles);
+
+water
+{
+    type            pureMovingPhaseModel;
+    diameterModel   constant;
+    constantCoeffs
+    {
+        d               1e-3;  // Not used for continuous phase, placeholder
+    }
+
+    residualAlpha   1e-6;
+}
+
+gas
+{
+    type            pureMovingPhaseModel;
+    diameterModel   velocityGroup;
+    velocityGroupCoeffs
+    {
+        populationBalance bubbles;
+        shapeModel        spherical;
+
+        // MUSIG (Multiple Size Group) model
+        // Initialize nanobubbles at 1 µm, track coalescence/breakup
+        sizeGroups
+        (
+            f1  { dSph 1e-6;  }   // 1 µm
+            f2  { dSph 5e-6;  }   // 5 µm
+            f3  { dSph 10e-6; }   // 10 µm
+            f4  { dSph 50e-6; }   // 50 µm
+            f5  { dSph 100e-6;}   // 100 µm
+            f6  { dSph 500e-6;}   // 500 µm
+            f7  { dSph 1e-3;  }   // 1 mm (coalescence limit)
+        );
+    }
+
+    residualAlpha   1e-6;
+}
+
+populationBalanceCoeffs
+{
+    bubbles
+    {
+        continuousPhase water;
+
+        coalescenceModels
+        (
+            PrinceBlanch{}
+        );
+
+        breakupModels
+        (
+            LaakkonenAlopaeusAittamaa
+            {
+                C1      6.0;
+                C2      0.04;
+                C3      0.01;
+            }
+        );
+
+        binaryBreakupModels ();
+        drift ();
+        nucleation ();
+    }
+}
+
+// ──────────────────────────────────────────────
+// Drag, Lift, and Mass Transfer
+// ──────────────────────────────────────────────
+
+blending
+{
+    default
+    {
+        type    linear;
+        minFullyContinuousAlpha.water 0.7;
+        minPartlyContinuousAlpha.water 0.3;
+        minFullyContinuousAlpha.gas 0.7;
+        minPartlyContinuousAlpha.gas 0.3;
+    }
+}
+
+drag
+(
+    (gas in water)
+    {
+        type            SchillerNaumann;
+        residualRe      1e-3;
+        swarmCorrection
+        {
+            type        none;
+        }
+    }
+);
+
+virtualMass
+(
+    (gas in water)
+    {
+        type            constantCoefficient;
+        Cvm             0.5;
+    }
+);
+
+lift
+(
+    (gas in water)
+    {
+        type            Tomiyama;  // Critical for vortex bubble migration
+        Cl              0.288;
+    }
+);
+
+heatTransfer ();
+
+// ──────────────────────────────────────────────
+// Interphase Mass Transfer — Higbie Penetration Theory
+// CO₂ dissolution rate into the liquid phase
+// kL = 2 * sqrt(Dc / (π * te))
+//
+// Dc = 1.92e-9 m²/s (CO₂ diffusivity in water at 25°C)
+// te = turbulent eddy contact time (from local turbulence)
+// ──────────────────────────────────────────────
+
+interfaceComposition
+(
+    (gas in water)
+    {
+        type saturated;
+        species (CO2);
+        Le 1.0;
+        saturationPressure
+        {
+            type constant;
+            pSat 101325;  // 1 atm
+        }
+    }
+);
+
+massTransfer
+(
+    (gas in water)
+    {
+        type            Higbie;  // Penetration theory
+        Dc              1.92e-9; // CO₂ diffusion coefficient (m²/s)
+    }
+);
+
+// ************************************************************************* //

@@ -1,0 +1,150 @@
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      controlDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// OpenCyclo CycloTwin — Solver Control
+// ──────────────────────────────────────────────────────────────────────────
+
+application     reactingMultiphaseEulerFoam;
+
+startFrom       startTime;
+startTime       0;
+
+stopAt          endTime;
+endTime         30;          // 30 seconds of physical time ≈ ~150 vortex rotations
+
+deltaT          1e-4;        // Initial timestep (adaptive CFL will adjust)
+
+writeControl    adjustableRunTime;
+writeInterval   0.1;         // Write every 0.1s
+
+purgeWrite      0;           // Keep all timesteps
+
+writeFormat     binary;
+writePrecision  8;
+writeCompression uncompressed;
+
+timeFormat      general;
+timePrecision   6;
+
+runTimeModifiable yes;
+
+adjustTimeStep  yes;
+maxCo           0.5;         // CFL limit
+maxAlphaCo      0.3;         // Phase-fraction CFL limit
+maxDeltaT       1e-2;
+
+// ──────────────────────────────────────────────
+// Function Objects — Real-Time Monitoring
+// ──────────────────────────────────────────────
+
+functions
+{
+    // Maximum shear rate — CRITICAL for Chlorella viability
+    fieldAverage1
+    {
+        type            fieldAverage;
+        libs            (fieldFunctionObjects);
+        writeControl    writeTime;
+        fields
+        (
+            U.water
+            {
+                mean        on;
+                prime2Mean  on;
+                base        time;
+            }
+        );
+    }
+
+    // Vortex core identification (Q-criterion)
+    Q
+    {
+        type            Q;
+        libs            (fieldFunctionObjects);
+        writeControl    writeTime;
+    }
+
+    // Volume-averaged quantities for monitoring convergence
+    volAverages
+    {
+        type            volFieldValue;
+        libs            (fieldFunctionObjects);
+
+        writeControl    timeStep;
+        writeInterval   100;  // Every 100 timesteps
+
+        operation       volAverage;
+        fields          (alpha.gas U.water p_rgh k.water omega.water);
+        regionType      all;
+    }
+
+    // Max shear rate probe
+    maxShearRate
+    {
+        type            coded;
+        libs            (utilityFunctionObjects);
+
+        writeControl    timeStep;
+        writeInterval   100;
+
+        codeExecute
+        #{
+            // Compute strain rate magnitude from velocity gradient
+            const volVectorField& U = mesh().lookupObject<volVectorField>("U.water");
+            volTensorField gradU = fvc::grad(U);
+            volScalarField S = sqrt(2.0 * (symm(gradU) && symm(gradU)));
+
+            scalar Gmax = gMax(S);
+
+            if (Pstream::master())
+            {
+                Info << "Max Shear Rate G = " << Gmax << " 1/s" << endl;
+
+                // Write to monitoring file
+                OFstream file("postProcessing/shearRate.dat", IOstreamOption::ASCII, IOstreamOption::APPEND);
+                file << mesh().time().value() << " " << Gmax << nl;
+            }
+        #};
+    }
+
+    // Streamlines for vortex visualization in ParaView
+    streamlines
+    {
+        type            streamlines;
+        libs            (fieldFunctionObjects);
+        U               U.water;
+        writeControl    writeTime;
+
+        nSubCycle       5;
+
+        setFormat       vtk;
+
+        direction       forward;
+        lifeTime        10000;
+
+        seedSampleSet
+        {
+            type        lineUniform;
+            start       (0.094 0 0.5);    // Near tangential inlet (OQ-2: 94mm offset)
+            end         (0.094 0 4.0);    // Up the cylinder
+            nPoints     20;
+        }
+    }
+
+    // kLa monitoring — mass transfer coefficient for CO2 dissolution
+    // (extracted and fed back to config.py LED sync constants)
+    residenceTime
+    {
+        type            particles;
+        libs            (lagrangianFunctionObjects);
+        writeControl    writeTime;
+    }
+}
+
+// ************************************************************************* //

@@ -1,0 +1,58 @@
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volVectorField;
+    location    "0";
+    object      U.water;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Water velocity boundary conditions
+//
+// Engineering Resolution Protocol:
+//   OQ-2: Tangential inlet at 94mm offset, 38mm (1.5" OD) tube
+//   OQ-3: Inlet velocity derived from pump flow rate
+//
+// For 1000L vessel at 1 VVM (Volume per Volume per Minute) liquid:
+//   Q = 1000 L/min = 0.0167 m³/s
+//   A_inlet = π * (0.019)² = 1.134e-3 m²
+//   U_inlet = Q / A = 14.7 m/s (tangential)
+// ──────────────────────────────────────────────────────────────────────────
+
+dimensions      [0 1 -1 0 0 0 0];
+
+internalField   uniform (0 0 0);
+
+boundaryField
+{
+    walls
+    {
+        type            noSlip;
+    }
+
+    // Tangential inlet — creates the cyclonic vortex
+    inlet
+    {
+        type            fixedValue;
+        // Tangential direction at 94mm offset = purely in theta direction
+        // For axis-aligned mesh, this is approximately (0, U_tangential, 0)
+        // oriented perpendicular to radial at the inlet patch
+        value           uniform (0 14.7 0);
+    }
+
+    // Top outlet — degassing boundary
+    outlet
+    {
+        type            pressureInletOutletVelocity;
+        phi             phi.water;
+        value           uniform (0 0 0);
+    }
+
+    // Bottom drain (normally closed during operation)
+    drain
+    {
+        type            noSlip;
+    }
+}
+
+// ************************************************************************* //

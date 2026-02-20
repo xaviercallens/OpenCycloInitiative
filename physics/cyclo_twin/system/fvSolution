@@ -1,0 +1,115 @@
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      fvSolution;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// OpenCyclo CycloTwin — Linear Solver Configuration
+//
+// PIMPLE algorithm for transient multiphase:
+//   - Outer correctors for coupling stability
+//   - Relaxation factors tuned for vortex flow
+// ──────────────────────────────────────────────────────────────────────────
+
+solvers
+{
+    "alpha.*"
+    {
+        nAlphaCorr      1;
+        nAlphaSubCycles 3;
+    }
+
+    p_rgh
+    {
+        solver          GAMG;
+        smoother        DICGaussSeidel;
+        tolerance       1e-8;
+        relTol          0.01;
+        minIter         1;
+    }
+
+    p_rghFinal
+    {
+        $p_rgh;
+        relTol          0;
+    }
+
+    "U.*"
+    {
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
+        tolerance       1e-6;
+        relTol          0.01;
+        minIter         1;
+    }
+
+    "U.*Final"
+    {
+        $"U.*";
+        relTol          0;
+    }
+
+    "(k|omega).*"
+    {
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
+        tolerance       1e-7;
+        relTol          0.01;
+        minIter         1;
+    }
+
+    "(k|omega).*Final"
+    {
+        $"(k|omega).*";
+        relTol          0;
+    }
+
+    "f.*"
+    {
+        solver          PBiCGStab;
+        preconditioner  DILU;
+        tolerance       1e-8;
+        relTol          0;
+    }
+}
+
+PIMPLE
+{
+    nOuterCorrectors    3;      // Outer pressure-velocity coupling loops
+    nCorrectors         2;      // Inner PISO correctors
+    nNonOrthogonalCorrectors 1; // Non-orthogonal correction
+
+    pRefCell            0;
+    pRefValue           0;
+
+    residualControl
+    {
+        "U.*"
+        {
+            relTol          0;
+            tolerance       1e-4;
+        }
+        p_rgh
+        {
+            relTol          0;
+            tolerance       1e-4;
+        }
+    }
+}
+
+relaxationFactors
+{
+    equations
+    {
+        ".*"            1;      // No under-relaxation for transient
+    }
+    fields
+    {
+        p_rgh           0.7;
+    }
+}
+
+// ************************************************************************* //

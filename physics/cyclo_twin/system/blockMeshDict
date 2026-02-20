@@ -1,0 +1,91 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  dev
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      blockMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Units: meters
+convertToMeters 1;
+
+// Engineering Specs (OQ-1):
+// R = 0.150 m
+// H_cylinder = 4.3 m
+// H_cone = 0.4 m
+// Total Height = 4.7 m
+
+vertices
+(
+    // A square-in-circle topology is best for cylindrical vortexes
+    // Core block (indices 0-7)
+    (-0.075 -0.075 0)      // 0
+    ( 0.075 -0.075 0)      // 1
+    ( 0.075  0.075 0)      // 2
+    (-0.075  0.075 0)      // 3
+    (-0.075 -0.075 4.7)    // 4
+    ( 0.075 -0.075 4.7)    // 5
+    ( 0.075  0.075 4.7)    // 6
+    (-0.075  0.075 4.7)    // 7
+
+    // Outer vertices at R=0.150 (cone tip is handled differently in reality,
+    // but for blockMesh placeholder we define the cylinder first)
+    // Z=0
+    (-0.150  0.000 0)      // 8
+    ( 0.000 -0.150 0)      // 9
+    ( 0.150  0.000 0)      // 10
+    ( 0.000  0.150 0)      // 11
+    // Z=4.7
+    (-0.150  0.000 4.7)    // 12
+    ( 0.000 -0.150 4.7)    // 13
+    ( 0.150  0.000 4.7)    // 14
+    ( 0.000  0.150 4.7)    // 15
+);
+
+blocks
+(
+    hex (0 1 2 3 4 5 6 7) (20 20 100) simpleGrading (1 1 1)
+);
+
+edges
+(
+);
+
+boundary
+(
+    walls
+    {
+        type wall;
+        faces
+        (
+            // To be expanded with full o-grid topology
+        );
+    }
+    outlet
+    {
+        type patch;
+        faces
+        (
+            (4 5 6 7)
+        );
+    }
+    inlet
+    {
+        type patch;
+        faces ();
+    }
+);
+
+mergePatchPairs
+(
+);
+
+// ************************************************************************* //

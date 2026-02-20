@@ -1,0 +1,27 @@
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      decomposeParDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// MPI domain decomposition for parallel runs
+// Target: 8 cores (Jetson Orin NX or workstation)
+// ──────────────────────────────────────────────────────────────────────────
+
+numberOfSubdomains  8;
+
+method              scotch;   // Automatic graph-based decomposition
+
+// Alternative: hierarchical for structured grids
+// method           hierarchical;
+// hierarchicalCoeffs
+// {
+//     n            (2 2 2);
+//     delta        0.001;
+//     order        xyz;
+// }
+
+// ************************************************************************* //

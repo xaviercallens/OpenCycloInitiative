@@ -39,11 +39,13 @@
 | SW-03 | pH-stat / CO₂ Dosing | `ph_stat_co2.py` | ✅ | SW-00 | SW-01 | pH 6.8 setpoint; PH Shock override for SOP-104 |
 | SW-04 | LED PWM Sync | `led_pwm_sync.py` | ✅ | SW-00, CFD-03 (angular velocity) | SW-01 | Code complete; ⚠️ PWM formula needs CFD data (OQ-4) |
 | SW-05 | Harvest Valve Control | *(in main_loop.py)* | 🔵 | SW-01, SW-02, HW-05 | — | Stub implemented; GPIO valve control TODO |
-| SW-06 | Calibration Script | `deploy/calibration.py` | ⬜ | SW-00 | SW-02 | Polynomial curve fit + ROI mask for vision sensor |
+| SW-06 | Calibration Script | `deploy/calibration.py` | ✅ | SW-00 | SW-02 | Polynomial curve fit + ROI mask for vision sensor |
 | SW-07 | Logger | `utils/logger.py` | ✅ | — | SW-01 | JSON-lines, log rotation |
 | SW-08 | Webhook Dispatcher | `utils/webhook.py` | ✅ | — | SW-02 | HTTP alerts for biosecurity events |
-| SW-09 | systemd Service | `deploy/opencyclo.service` | ⬜ | SW-01 | — | Auto-start on boot |
-| SW-10 | Setup Script | `deploy/setup.sh` | ⬜ | SW-00 | — | One-shot provisioning on Jetson Nano / RPi 5 |
+| SW-09 | systemd Service | `deploy/setup.sh` | ✅ | SW-01 | — | Embedded in setup.sh; auto-start on boot |
+| SW-10 | Setup Script | `deploy/setup.sh` | ✅ | SW-00 | — | One-shot provisioning on Jetson Nano / RPi 5 |
+| SW-13 | Telemetry API | `telemetry_api.py` | ✅ | SW-00 | — | FastAPI REST + WebSocket for HUD & Cyclo-Earth |
+| SW-14 | State Persistence | `state_persistence.py` | ✅ | SW-00 | SW-01 | Power-loss recovery with atomic writes |
 | SW-11 | YOLOv8 Model | `models/best_biosecurity.pt` | ⬜ | — | SW-02 | ⚠️ Blocked: training dataset does not exist (OQ-2) |
 | SW-12 | Unit Tests | `tests/` | ✅ | SW-00, SW-01 | — | `pytest` + `pytest-asyncio` |
 
@@ -53,13 +55,15 @@
 
 | ID | Component | File / Directory | Status | Depends On | Blocks | Notes |
 |---|---|---|---|---|---|---|
-| CFD-01 | Mesh Config | `system/snappyHexMeshDict` | ⬜ | HW-03 geometry as STL | HW-03 (pre-machining validation), CFD-02 | 5-layer prism BL at PC wall |
-| CFD-02 | Background Mesh | `system/blockMeshDict` | ⬜ | — | CFD-01 | Coarse hex lattice |
-| CFD-03 | Phase Properties | `constant/phaseProperties` | ⬜ | — | CFD-04 | Water + CO₂; PBE bubble diameter (~1 µm nanobubbles) |
-| CFD-04 | Boundary Conditions | `0/U.water`, `0/U.gas`, `0/p_rgh` | ⬜ | CFD-03 | CFD-05 | degassingBoundary at top vent |
-| CFD-05 | Solver Config | `system/fvSchemes`, `system/fvSolution`, `system/controlDict` | ⬜ | CFD-01–04 | CFD-06 | kOmegaSST; PIMPLE loop |
+| CFD-01 | Mesh Config | `system/snappyHexMeshDict` | ⬜ | HW-03 geometry as STL | HW-03 (pre-machining validation), CFD-02 | 5-layer prism BL at PC wall — pending STL |
+| CFD-02 | Background Mesh | `system/blockMeshDict` | ✅ | — | CFD-01 | Cylindrical mesh with OQ-1 dimensions |
+| CFD-03 | Phase Properties | `constant/phaseProperties` | ✅ | — | CFD-04 | MUSIG bubble model + Higbie mass transfer |
+| CFD-04 | Boundary Conditions | `0/U.water`, `0/alpha.water`, `0/p_rgh`, `0/k`, `0/omega` | ✅ | CFD-03 | CFD-05 | Tangential inlet (14.7 m/s), degassing outlet |
+| CFD-05 | Solver Config | `system/fvSchemes`, `system/fvSolution`, `system/controlDict` | ✅ | CFD-01–04 | CFD-06 | kOmegaSST; PIMPLE; MUSCL divergence; MPI decomp |
 | CFD-06 | Simulation Run | *(cluster/local execution)* | ⬜ | CFD-01–05 | CFD-07 | `reactingMultiphaseEulerFoam`, parallel MPI |
-| CFD-07 | Validation Report | `physics/openfoam/VALIDATION_REPORT.md` | ⬜ | CFD-06 | INT-1, INT-2, SW-04 | G_max ≤ threshold (OQ-5). Feeds LED PWM formula |
+| CFD-07 | Validation Report | `physics/openfoam/VALIDATION_REPORT.md` | ⬜ | CFD-06 | INT-1, INT-2, SW-04 | G_max ≤ threshold. Feeds LED PWM formula |
+| CFD-08 | Han ODE Model | `han_model.py` | ✅ | — | CFD-07, SW-04 | Three-state photosynthetic model + FLE optimizer |
+| CFD-09 | Turbulence Model | `constant/turbulenceProperties` | ✅ | — | CFD-05 | k-ω SST with Menter coefficients |
 
 ---
 
@@ -67,11 +71,11 @@
 
 | ID | Component | File | Status | Depends On | Blocks | Notes |
 |---|---|---|---|---|---|---|
-| WT-01 | Media Formulation SOP | `SOP-101_Media_Formulation.md` | ⬜ | — | WT-02 | Wastewater nexus; UV-C dose TBD (OQ-8) |
-| WT-02 | Inoculation SOP | `SOP-102_Strain_Inoculation.md` | ⬜ | WT-01, HW-01 (reactor ready) | WT-03 | UTEX 2714 sourcing + 50L seed carboy protocol |
-| WT-03 | Turbidostat Harvesting SOP | `SOP-103_Turbidostat_Harvesting.md` | ⬜ | WT-02, SW-02 (vision trigger) | — | Harvest density threshold TBD (OQ-7) |
-| WT-04 | Contamination / Biosecurity SOP | `SOP-104_Contamination_Biosecurity.md` | ⬜ | WT-02, SW-03 (pH override) | — | pH Shock: pH 4.5 for 4h; *Chlorella* survives |
-| WT-05 | Strain Registry | `STRAIN_REGISTRY.md` | ⬜ | — | WT-02 | UTEX 2714 + *Scenedesmus obliquus* records |
+| WT-01 | Media Formulation SOP | `SOP-101_Media_Formulation.md` | ✅ | — | WT-02 | BBM (garage) + wastewater-digestate (industrial); UV-C 40 mJ/cm² |
+| WT-02 | Inoculation SOP | `SOP-102_Strain_Inoculation.md` | ✅ | WT-01, HW-01 (reactor ready) | WT-03 | UTEX 2714 sourcing + flask → 50L carboy scale-up |
+| WT-03 | Turbidostat Harvesting SOP | `SOP-103_Turbidostat_Harvesting.md` | ✅ | WT-02, SW-02 (vision trigger) | — | 4 g/L garage, 6 g/L industrial; hydrocyclone + siphon |
+| WT-04 | Contamination / Biosecurity SOP | `SOP-104_Contamination_Biosecurity.md` | ✅ | WT-02, SW-03 (pH override) | — | pH Shock: pH 4.5 for 4h; 48h recovery protocol |
+| WT-05 | Strain Registry | `STRAIN_REGISTRY.md` | ✅ | — | WT-02 | Template ready; UTEX 2714 tracking |
 
 ---
 
@@ -109,11 +113,11 @@
 | Domain | Total Components | ✅ Done | 🔵 In Progress | ⚠️ Blocked | ⬜ Not Started |
 |---|---|---|---|---|---|
 | Hardware / CAD | 7 | 0 | 0 | 0 | 7 |
-| Software / OS | 12 | 7 | 1 | 0 | 4 |
-| CFD Simulation | 7 | 0 | 0 | 0 | 7 |
-| Wetware / SOPs | 5 | 0 | 0 | 0 | 5 |
+| Software / OS | 14 | 12 | 1 | 0 | 1 |
+| CFD Simulation | 9 | 6 | 0 | 0 | 3 |
+| Wetware / SOPs | 5 | 5 | 0 | 0 | 0 |
 | Integration Points | 7 | 0 | 0 | 3 | 4 |
-| **TOTAL** | **38** | **7** | **1** | **3** | **27** |
+| **TOTAL** | **42** | **23** | **1** | **3** | **15** |
 
 ---
 

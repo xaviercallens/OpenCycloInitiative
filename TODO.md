@@ -229,7 +229,44 @@ Integration milestones are marked **[INT]**.
 
 ---
 
-## 🔗 PHASE 6 — Integration & Validation *(Weeks 6–8)*
+## 🌊 PHASE 6 — Digital Twin (`/physics/cyclo_twin/`)
+*Simulating the 1000L industrial vessel using High-Fidelity CFD and PINNs.*
+
+- [ ] **OpenFOAM Case Setup:**
+  - [ ] `snappyHexMesh` with 5-layer prism insertion (y+ < 1)
+  - [ ] `reactingMultiphaseEulerFoam` with MUSIG bubble model (OQ-6)
+  - [ ] Higbie Penetration Theory for CO2 mass transfer calibration
+- [ ] **Lagrangian Cellular Tracking:**
+  - [ ] Inject 100,000 massless tracer particles
+  - [ ] Implement **Han Photosynthetic ODE Model** in Python via preCICE
+- [ ] **PINN Surrogate Engine:**
+  - [ ] Train **NVIDIA Modulus** FNO model on OpenFOAM snapshots
+  - [ ] Deploy TensorRT engine for <20ms real-time inference
+- [ ] **Synthetic Vision Pipeline:**
+  - [ ] Fluid-to-VDB export script
+  - [ ] Blender/Godot headless renderer for synthetic YOLOv8 training (OQ-8)
+
+---
+
+## 🚀 PHASE 7 — C.Y.C.L.O.S. HUD (`/software/hud/`)
+*The "Stark-Tech" holographic command center for experimental visualization.*
+
+- [ ] **Front-End Architecture:**
+  - [ ] React 19 + Vite + Tailwind CSS (Glassmorphism UI)
+  - [ ] **React Three Fiber** for the central holographic 3D Twin
+- [ ] **Visual HUD Widgets:**
+  - [ ] "Arc Reactor" Phase-Lock dial for LED/Pump synchronization
+  - [ ] YOLOv8 "Sniper" Vision Feed overlay with targeting reticles
+  - [ ] Plastoquinone state matrix (Han model) hexagonal visualization
+- [ ] **Animations & Sound:**
+  - [ ] "J.A.R.V.I.S." boot sequence choreography (GSAP/Framer Motion)
+  - [ ] Web Audio API integration for cinematic telemetry SFX
+- [ ] **Uplink:**
+  - [ ] Real-time Socket.io bridge to OpenCyclo OS telemetry stream
+
+---
+
+## 🔗 PHASE 8 — Integration & Validation *(Weeks 6–8)*
 
 - [ ] **[INT-1]** CAD → CFD: Import finalized `02_Hydro_Base_60deg.step` geometry into OpenFOAM mesh pipeline
 - [ ] **[INT-2]** CFD → Software: Extract kLa values and vortex angular velocity; update `led_pwm_sync.py` constants
@@ -242,7 +279,7 @@ Integration milestones are marked **[INT]**.
 
 ---
 
-## 📦 PHASE 7 — Release Preparation *(Week 8+)*
+## 📦 PHASE 9 — Release Preparation *(Week 8+)*
 
 - [ ] Fill in all `⚠️ fill in values` gaps in spec (bounding box dimensions, flow rates, cell counts, etc.)
 - [ ] Peer review of all four domain folders by domain experts

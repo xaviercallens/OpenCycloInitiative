@@ -1,0 +1,46 @@
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volScalarField;
+    location    "0";
+    object      alpha.water;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Phase fraction: alpha.water = 1 (pure water), alpha.gas = 1 - alpha.water
+// Initial condition: vessel is full of water with trace gas from sparger
+// ──────────────────────────────────────────────────────────────────────────
+
+dimensions      [0 0 0 0 0 0 0];
+
+internalField   uniform 0.999;  // 99.9% water, 0.1% gas initially
+
+boundaryField
+{
+    walls
+    {
+        type            zeroGradient;
+    }
+
+    inlet
+    {
+        type            fixedValue;
+        value           uniform 1.0;  // Pure water entering
+    }
+
+    outlet
+    {
+        // Degassing boundary: gas escapes, liquid reflects
+        type            inletOutlet;
+        phi             phi.water;
+        inletValue      uniform 1.0;
+        value           uniform 1.0;
+    }
+
+    drain
+    {
+        type            zeroGradient;
+    }
+}
+
+// ************************************************************************* //

@@ -1,0 +1,49 @@
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volScalarField;
+    location    "0";
+    object      p_rgh;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Pressure (minus hydrostatic component)
+// ──────────────────────────────────────────────────────────────────────────
+
+dimensions      [1 -1 -2 0 0 0 0];
+
+internalField   uniform 0;
+
+boundaryField
+{
+    walls
+    {
+        type            fixedFluxPressure;
+        value           uniform 0;
+    }
+
+    inlet
+    {
+        type            fixedFluxPressure;
+        value           uniform 0;
+    }
+
+    outlet
+    {
+        // Open to atmosphere at top
+        type            prghTotalPressure;
+        p0              uniform 0;
+        U               U.water;
+        phi             phi.water;
+        rho             rho.water;
+        value           uniform 0;
+    }
+
+    drain
+    {
+        type            fixedFluxPressure;
+        value           uniform 0;
+    }
+}
+
+// ************************************************************************* //
