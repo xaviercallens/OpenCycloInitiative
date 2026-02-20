@@ -64,6 +64,35 @@
 | CFD-07 | Validation Report | `physics/openfoam/VALIDATION_REPORT.md` | ⬜ | CFD-06 | INT-1, INT-2, SW-04 | G_max ≤ threshold. Feeds LED PWM formula |
 | CFD-08 | Han ODE Model | `han_model.py` | ✅ | — | CFD-07, SW-04 | Three-state photosynthetic model + FLE optimizer |
 | CFD-09 | Turbulence Model | `constant/turbulenceProperties` | ✅ | — | CFD-05 | k-ω SST with Menter coefficients |
+| CFD-10 | Radiation Model | `constant/radiationProperties` | ✅ | — | CFD-06 | fvDOM radiative transfer for LED photonic field |
+
+---
+
+## 🔬 Domain 3b — Digital Twin / SITL
+
+| ID | Component | File / Directory | Status | Depends On | Blocks | Notes |
+|---|---|---|---|---|---|---|
+| DT-01 | SITL Hardware Bridge | `sitl/ros2_hardware_bridge.py` | ✅ | — | DT-02 | ROS 2 + standalone TCP fallback |
+| DT-02 | Simplified Physics Model | *(in DT-01)* | ✅ | — | — | Lightweight ODE model for testing without GPU |
+| DT-03 | Synthetic Vision Pipeline | `synthetic_vision/render_vdb.py` | ✅ | — | SW-11 | Blender headless renderer + YOLO auto-annotation |
+| DT-04 | Docker Compose Stack | `docker-compose.yml` | ✅ | — | — | 6 services: OpenFOAM, Modulus, Blender, SITL, Telemetry, MQTT |
+| DT-05 | PINN Surrogate (Modulus) | *(planned)* | ⬜ | CFD-06 | — | FNO training on CFD snapshots |
+| DT-06 | preCICE Coupling | *(planned)* | ⬜ | CFD-06, CFD-08 | — | Lagrangian particle → Han ODE coupling |
+
+---
+
+## 🌍 Domain 5 — Cyclo-Earth Planetary Simulator
+
+| ID | Component | File | Status | Depends On | Blocks | Notes |
+|---|---|---|---|---|---|---|
+| CE-01 | PSC Flux Equations | `cyclo_earth.py` | ✅ | — | CE-02 | F_cyclo, F_char, F_soil |
+| CE-02 | Climate Model (Hector-lite) | `cyclo_earth.py` | ✅ | CE-01 | CE-03 | Simplified carbon-cycle + ECS |
+| CE-03 | Scenario System | `cyclo_earth.py` | ✅ | CE-02 | — | Conservative, Aggressive, Alpha Node presets |
+| CE-04 | Reality Sync Module | `cyclo_earth.py` | ✅ | CE-01 | CE-05 | SvR (Simulation vs Reality) index |
+| CE-05 | MQTT Telemetry Ingestion | `mqtt_ingest.py` | ✅ | — | CE-04 | Subscribes to `opencyclo/+/{status,co2,density}` |
+| CE-06 | FastAPI Backend | `api.py` | ✅ | CE-01–05 | — | REST API for frontend + WebSocket globe stream |
+| CE-07 | Web Frontend (Globe) | *(planned — Next.js + Globe.gl)* | ⬜ | CE-06 | — | 3D WebGL Earth + slider control deck |
+| CE-08 | Hector Wasm Build | *(planned)* | ⬜ | — | CE-07 | C++ → WebAssembly for browser-side climate math |
 
 ---
 
@@ -114,10 +143,12 @@
 |---|---|---|---|---|---|
 | Hardware / CAD | 7 | 0 | 0 | 0 | 7 |
 | Software / OS | 14 | 12 | 1 | 0 | 1 |
-| CFD Simulation | 9 | 6 | 0 | 0 | 3 |
+| CFD Simulation | 10 | 7 | 0 | 0 | 3 |
+| Digital Twin / SITL | 6 | 4 | 0 | 0 | 2 |
 | Wetware / SOPs | 5 | 5 | 0 | 0 | 0 |
+| Cyclo-Earth | 8 | 6 | 0 | 0 | 2 |
 | Integration Points | 7 | 0 | 0 | 3 | 4 |
-| **TOTAL** | **42** | **23** | **1** | **3** | **15** |
+| **TOTAL** | **57** | **34** | **1** | **3** | **19** |
 
 ---
 
