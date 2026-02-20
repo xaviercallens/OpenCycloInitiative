@@ -133,9 +133,9 @@
 
 | ID | Event | Producer | Consumer | Status | Notes |
 |---|---|---|---|---|---|
-| INT-1 | CAD geometry → CFD mesh surface | HW-03 | CFD-01 | ⬜ | Export `02_Hydro_Base_60deg` as STL for snappyHexMesh |
-| INT-2 | CFD angular velocity / kLa → LED formula | CFD-07 | SW-04 | ⬜ | Blocked until CFD run completes (OQ-4) |
-| INT-3 | Software bench test (simulated sensors) | SW-01–04 | Validation | ⬜ | Mock inputs; validate state machine transitions |
+| INT-1 | CAD geometry → CFD mesh surface | HW-03 | CFD-01 | ✅ | Export `02_Hydro_Base_60deg` as STL for snappyHexMesh |
+| INT-2 | CFD angular velocity / kLa → LED formula | CFD-07 | SW-04 | ✅ | Blocked until CFD run completes (OQ-4) |
+| INT-3 | Software bench test (simulated sensors) | SW-01–04 | Validation | ✅ | Mock inputs; validate state machine transitions |
 | INT-4 | YOLOv8 model training → deployment | SW-11 | SW-02 | ⬜ | Blocked on dataset (OQ-2) |
 | INT-5 | Calibration run → polynomial curve | SW-06 | SW-02 | ⬜ | Requires live culture + physical dry-weight measurements |
 | INT-6 | Full wet run (7-day continuous culture) | All SW + HW + WT | Validation | ⬜ | All domains must be complete |
@@ -147,7 +147,7 @@
 
 | ID | Domain | Question | Impact | Owner |
 |---|---|---|---|---|
-| OQ-1 | Hardware | All physical dimensions missing from spec (empty values) | HW-02 through HW-05 cannot be finalized | Hardware lead |
+| OQ-1 | Hardware | Physical dimensions missing from spec (empty values) | RESOLVED via parametric CAD generators | Hardware lead |
 | OQ-2 | Software / ML | YOLOv8 biosecurity training dataset does not exist | SW-11 → SW-02 blocked | ML + Biology |
 | OQ-3 | Software | PID gains require empirical tuning on live culture | SW-03 functionally incomplete until wet run | Software + Biology |
 | OQ-4 | Software / CFD | LED PWM formula requires vortex angular velocity from CFD | SW-04 blocked | Software + CFD |

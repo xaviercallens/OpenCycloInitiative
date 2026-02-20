@@ -288,19 +288,19 @@ Integration milestones are marked **[INT]**.
   - [ ] Port canvas HUD to React 19 + Vite + Three.js
   - [ ] Import `.GLTF` reactor model for true 3D hologram
   - [ ] GLSL vertex shader for 100K-particle Rankine vortex
-- [ ] **Animations & Sound:**
-  - [ ] Web Audio API integration for cinematic telemetry SFX
-- [ ] **Uplink:**
-  - [ ] Real-time WebSocket bridge to `telemetry_api.py` (SW-13)
-  - [ ] MQTT subscription for live sensor data
+- [x] **Animations & Sound:**
+  - [x] Web Audio API integration for cinematic telemetry SFX
+- [x] **Uplink:**
+  - [x] Real-time WebSocket bridge to `telemetry_api.py` (SW-13)
+  - [x] MQTT subscription for live sensor data
 
 ---
 
 ## 🔗 PHASE 8 — Integration & Validation *(Weeks 6–8)*
 
-- [ ] **[INT-1]** CAD → CFD: Import finalized `02_Hydro_Base_60deg.step` geometry into OpenFOAM mesh pipeline
-- [ ] **[INT-2]** CFD → Software: Extract kLa values and vortex angular velocity; update `led_pwm_sync.py` constants
-- [ ] **[INT-3]** Software bench test: Run full `main_loop.py` with simulated sensor inputs; validate state machine transitions
+- [x] **[INT-1]** CAD → CFD: Import finalized `02_Hydro_Base_60deg.step` geometry into OpenFOAM mesh pipeline
+- [x] **[INT-2]** CFD → Software: Extract kLa values and vortex angular velocity; update `led_pwm_sync.py` constants
+- [x] **[INT-3]** Software bench test: Run full `main_loop.py` with simulated sensor inputs; validate state machine transitions
 - [ ] **[INT-4]** Biosecurity model: Train or source YOLOv8 INT8 model; validate detection accuracy
 - [ ] **[INT-5]** Calibration run: Collect biomass vs. RGB data points; fit polynomial regression curve
 - [ ] **[INT-6]** Full wet run: Operate SMU-1000 prototype with all software systems active; log 7-day continuous culture
@@ -311,8 +311,8 @@ Integration milestones are marked **[INT]**.
 
 ## 📦 PHASE 9 — Release Preparation *(Week 8+)*
 
-- [ ] Fill in all `⚠️ fill in values` gaps in spec (bounding box dimensions, flow rates, cell counts, etc.)
-- [ ] Peer review of all four domain folders by domain experts
+- [x] Fill in all `⚠️ fill in values` gaps in spec (bounding box dimensions, flow rates, cell counts, etc.)
+- [x] Peer review of all four domain folders by domain experts
 - [ ] Pass license compliance check (CERN-OHL-S export control, OpenMTA material terms)
 - [ ] Tag release `v1.0.0` on GitHub
 - [ ] Publish to relevant communities: Hackster.io, Instructables, OpenBiofoundry, OSE (Open Source Ecology)
