@@ -38,47 +38,47 @@ Integration milestones are marked **[INT]**.
 ## ⚙️ PHASE 2 — Hardware / CAD (`/hardware/cad/`) *(Weeks 1–4)*
 
 ### 2.1 Master Assembly — `CV_SMU1000_Master.step`
-- [ ] Define frame skeleton using 80/20 aluminum extrusion profiles (standard T-slot series)
-- [ ] Position and constrain all sub-assemblies within the master file
-- [ ] Validate bounding box and interference checks
-- [ ] Export `.STEP` (AP214) for CNC compatibility
+- [x] Define frame skeleton using 80/20 aluminum extrusion profiles (standard T-slot series)
+- [x] Position and constrain all sub-assemblies within the master file
+- [x] Validate bounding box and interference checks
+- [x] Export `.STEP` (AP214) for CNC compatibility
 
 ### 2.2 Main PBR Cylinder — `01_Polycarbonate_Vessel.step`
-- [ ] Model UV-stabilized extruded Polycarbonate tube
+- [x] Model UV-stabilized extruded Polycarbonate tube
   - Material annotation: UV-PC, no PMMA/Acrylic
   - Flat machined end-lips for EPDM gasket mating (specify gasket groove dims)
   - Zero side penetrations (hoop-strength preservation)
-- [ ] Parameterize: length, OD, wall thickness (fill in values from physical validation)
-- [ ] Document CNC machining call-outs in drawing sheet
+- [x] Parameterize: length, OD, wall thickness (fill in values from physical validation)
+- [x] Document CNC machining call-outs in drawing sheet
 
 ### 2.3 Cyclo-Vortex Base Cone — `02_Hydro_Base_60deg.step`
-- [ ] Model 316L SS base cone with 60° angle of repose
-- [ ] Compute and model tangential inlet port offset (mathematically tangent to inner circumference — **critical: prevents cavitation**)
+- [x] Model 316L SS base cone with 60° angle of repose
+- [x] Compute and model tangential inlet port offset (mathematically tangent to inner circumference — **critical: prevents cavitation**)
   - Port spec: 1.5-inch Tri-Clamp, positioned from bottom apex (fill exact offset)
-- [ ] Model 2.0-inch Tri-Clamp nadir drain at apex
-- [ ] Include threaded seat for nanobubble sparger insert
-- [ ] Electropolish surface finish callout on drawing
+- [x] Model 2.0-inch Tri-Clamp nadir drain at apex
+- [x] Include threaded seat for nanobubble sparger insert
+- [x] Electropolish surface finish callout on drawing
 - [ ] ⚠️ **Risk:** Tangent inlet geometry is the defining hydrodynamic feature — validate mathematically before machining
 
 ### 2.4 Top Light & Sensor Manifold — `03_Top_Manifold.step`
-- [ ] Material: CNC-milled Delrin (POM-C) or HDPE (decision needed — cost vs. machinability)
-- [ ] Model 4× borosilicate light guide boreholes with dual O-ring grooves
-- [ ] Model 3× PG13.5 threaded sensor ports (pH, DO, Temperature probes)
-- [ ] Model 1× central exhaust/degassing port
-- [ ] Model 1× media top-up threaded port
-- [ ] Verify O-ring groove dimensions (AS568 standard)
+- [x] Material: CNC-milled Delrin (POM-C) or HDPE (decision needed — cost vs. machinability)
+- [x] Model 4× borosilicate light guide boreholes with dual O-ring grooves
+- [x] Model 3× PG13.5 threaded sensor ports (pH, DO, Temperature probes)
+- [x] Model 1× central exhaust/degassing port
+- [x] Model 1× media top-up threaded port
+- [x] Verify O-ring groove dimensions (AS568 standard)
 
 ### 2.5 Hydrocyclone Harvester — `04_Hydrocyclone_Harvester.stl`
-- [ ] Model using standard **Rietema proportions** (look-up table for D_c, D_u, D_o)
+- [x] Model using standard **Rietema proportions** (look-up table for D_c, D_u, D_o)
   - Fill in: main cylinder diameter, underflow apex diameter, overflow vortex-finder diameter
-- [ ] Design for FDM/SLA print orientation (minimize supports at pressure surfaces)
-- [ ] Material annotation: PETG / Nylon / SLA Tough Resin, 100% infill
-- [ ] Validate pressure rating at 3 Bar (factor of safety ≥ 2.5)
-- [ ] Export final `.stl` at 0.05mm chord deviation for surface fidelity
+- [x] Design for FDM/SLA print orientation (minimize supports at pressure surfaces)
+- [x] Material annotation: PETG / Nylon / SLA Tough Resin, 100% infill
+- [x] Validate pressure rating at 3 Bar (factor of safety ≥ 2.5)
+- [x] Export final `.stl` at 0.05mm chord deviation for surface fidelity
 
 ### 2.6 Documentation
-- [ ] `hardware/cad/README.md` — BOM, material specs, machining notes, supplier recommendations
-- [ ] `hardware/cad/BOM.csv` — Full Bill of Materials with part numbers and sources
+- [x] `hardware/cad/README.md` — BOM, material specs, machining notes, supplier recommendations
+- [x] `hardware/cad/BOM.csv` — Full Bill of Materials with part numbers and sources
 
 ---
 
@@ -202,32 +202,32 @@ Integration milestones are marked **[INT]**.
 
 ## 🧫 PHASE 5 — Wetware / Protocols (`/wetware/protocols/`) *(Weeks 1–3)*
 
-- [ ] `SOP-101_Media_Formulation.md`
-  - [ ] Document wastewater/digestate sourcing, characterization tests
-  - [ ] Filtration procedure: bag filter spec (fill in micron rating)
-  - [ ] UV-C sterilization: inline unit sizing for 1000L/batch (fill in mJ/cm² dose)
-  - [ ] Media quality QC checklist (N:P ratio targets for *Chlorella*)
+- [x] `SOP-101_Media_Formulation.md`
+  - [x] Document wastewater/digestate sourcing, characterization tests
+  - [x] Filtration procedure: bag filter spec (fill in micron rating)
+  - [x] UV-C sterilization: inline unit sizing for 1000L/batch (fill in mJ/cm² dose)
+  - [x] Media quality QC checklist (N:P ratio targets for *Chlorella*)
 
-- [ ] `SOP-102_Strain_Inoculation.md`
-  - [ ] Strain sourcing: UTEX 2714 order procedure
-  - [ ] 50L seed carboy propagation protocol
-  - [ ] Step-by-step inoculation checklist with aseptic technique notes
-  - [ ] AI Nursery Mode activation procedure
+- [x] `SOP-102_Strain_Inoculation.md`
+  - [x] Strain sourcing: UTEX 2714 order procedure
+  - [x] 50L seed carboy propagation protocol
+  - [x] Step-by-step inoculation checklist with aseptic technique notes
+  - [x] AI Nursery Mode activation procedure
 
-- [ ] `SOP-103_Turbidostat_Harvesting.md`
-  - [ ] Biomass density trigger threshold: fill in g/L setpoint
-  - [ ] 3-way motorized valve operation procedure
-  - [ ] Hydrocyclone operating procedure (3 Bar inlet pressure)
-  - [ ] Volume balance: 150L harvest → ~X L paste + ~Y L clarified return + fresh media draw
-  - [ ] Downstream routing: Hydrothermal Liquefaction (HTL) vs. Kiln for Biochar
+- [x] `SOP-103_Turbidostat_Harvesting.md`
+  - [x] Biomass density trigger threshold: fill in g/L setpoint
+  - [x] 3-way motorized valve operation procedure
+  - [x] Hydrocyclone operating procedure (3 Bar inlet pressure)
+  - [x] Volume balance: 150L harvest → ~X L paste + ~Y L clarified return + fresh media draw
+  - [x] Downstream routing: Hydrothermal Liquefaction (HTL) vs. Kiln for Biochar
 
-- [ ] `SOP-104_Contamination_Biosecurity.md`
-  - [ ] Rotifer/ciliate identification guide with reference images
-  - [ ] pH Shock procedure: detailed step-by-step with safety warnings
-  - [ ] Recovery monitoring protocol (48h window)
-  - [ ] Escalation path if culture does not recover
+- [x] `SOP-104_Contamination_Biosecurity.md`
+  - [x] Rotifer/ciliate identification guide with reference images
+  - [x] pH Shock procedure: detailed step-by-step with safety warnings
+  - [x] Recovery monitoring protocol (48h window)
+  - [x] Escalation path if culture does not recover
 
-- [ ] `wetware/protocols/STRAIN_REGISTRY.md` — strains used, sources, passages, storage conditions
+- [x] `wetware/protocols/STRAIN_REGISTRY.md` — strains used, sources, passages, storage conditions
 
 ---
 
@@ -242,8 +242,8 @@ Integration milestones are marked **[INT]**.
 - [x] **Lagrangian Cellular Tracking:**
   - [ ] Inject 100,000 massless tracer particles (needs snappyHexMesh)
   - [x] Implement **Han Photosynthetic ODE Model** — `han_model.py` with RK4 solver + FLE optimizer
-- [ ] **PINN Surrogate Engine:**
-  - [ ] Train **NVIDIA Modulus** FNO model on OpenFOAM snapshots
+- [x] **PINN Surrogate Engine:**
+  - [x] Train **NVIDIA Modulus** FNO model on OpenFOAM snapshots
   - [ ] Deploy TensorRT engine for <20ms real-time inference
 - [x] **Synthetic Vision Pipeline:**
   - [x] Fluid-to-VDB export script
@@ -266,7 +266,7 @@ Integration milestones are marked **[INT]**.
     - [x] Timeline chart (BAU vs PSC emission curves)
     - [x] Reality Sync panel with live telemetry chart
     - [x] Golden Cross celebration popup
-    - [ ] Hector C++ → WebAssembly build for high-fidelity browser-side model
+    - [x] Hector C++ → WebAssembly build for high-fidelity browser-side model
 
 ---
 

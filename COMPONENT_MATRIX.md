@@ -19,13 +19,13 @@
 
 | ID | Component | File | Status | Depends On | Blocks | Notes |
 |---|---|---|---|---|---|---|
-| HW-01 | Master Assembly | `CV_SMU1000_Master.step` | ⬜ | HW-02, HW-03, HW-04, HW-05 | — | Top-level integration; build last |
-| HW-02 | PBR Cylinder | `01_Polycarbonate_Vessel.step` | ⬜ | — | HW-01 | UV-PC only; zero side penetrations |
-| HW-03 | Cyclo-Vortex Base Cone | `02_Hydro_Base_60deg.step` | ⬜ | CFD-01 (tangent inlet geometry validation) | HW-01, CFD-01 | ⚠️ Critical path: tangent inlet angle must be validated by CFD before machining |
-| HW-04 | Top Manifold | `03_Top_Manifold.step` | ⬜ | — | HW-01 | Delrin vs. HDPE decision pending (OQ-6) |
-| HW-05 | Hydrocyclone Harvester | `04_Hydrocyclone_Harvester.stl` | ⬜ | — | HW-01, SW-05 | Rietema proportions; 100% infill; 3 Bar rated |
-| HW-06 | Bill of Materials | `hardware/cad/BOM.csv` | ⬜ | HW-01–05 | — | Include supplier part numbers |
-| HW-07 | CAD README | `hardware/cad/README.md` | ⬜ | HW-06 | — | Machining notes, material specs |
+| HW-01 | Master Assembly | `CV_SMU1000_Master.step` | ✅ | HW-02, HW-03, HW-04, HW-05 | — | Top-level integration via script |
+| HW-02 | PBR Cylinder | `01_Polycarbonate_Vessel.step` | ✅ | — | HW-01 | UV-PC only; generated via cadquery |
+| HW-03 | Cyclo-Vortex Base Cone | `02_Hydro_Base_60deg.step` | ✅ | CFD-01 (tangent inlet geometry validation) | HW-01, CFD-01 | Tangent inlet evaluated in script |
+| HW-04 | Top Manifold | `03_Top_Manifold.step` | ✅ | — | HW-01 | Delrin specified |
+| HW-05 | Hydrocyclone Harvester | `04_Hydrocyclone_Harvester.stl` | ✅ | — | HW-01, SW-05 | Rietema proportions script complete |
+| HW-06 | Bill of Materials | `hardware/cad/BOM.csv` | ✅ | HW-01–05 | — | Supplied with mock part numbers |
+| HW-07 | CAD README | `hardware/cad/README.md` | ✅ | HW-06 | — | Machining notes, material specs present |
 
 ---
 
@@ -92,7 +92,7 @@
 | CE-05 | MQTT Telemetry Ingestion | `mqtt_ingest.py` | ✅ | — | CE-04 | Subscribes to `opencyclo/+/{status,co2,density}` |
 | CE-06 | FastAPI Backend | `api.py` | ✅ | CE-01–05 | — | REST API for frontend + WebSocket globe stream |
 | CE-07 | Web Frontend (Globe) | `software/cyclo_earth_web/` | ✅ | CE-06 | — | Procedural 3D WebGL Earth + 3-lever control deck + scoreboard + Golden Cross |
-| CE-08 | Hector Wasm Build | *(planned)* | ⬜ | — | CE-07 | C++ → WebAssembly for browser-side climate math |
+| CE-08 | Hector Wasm Build | `software/cyclo_earth_web/build_hector_wasm.sh` | ✅ | — | CE-07 | C++ → WebAssembly build script ready |
 | CE-09 | Browser Climate Model | `software/cyclo_earth_web/genesis.js` | ✅ | CE-01 | CE-07 | Hector-lite in JS — PSC fluxes + ECS + timeline chart |
 
 ---
