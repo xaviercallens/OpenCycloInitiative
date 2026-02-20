@@ -258,24 +258,41 @@ Integration milestones are marked **[INT]**.
   - [x] Reality Sync module + MQTT telemetry ingestion
   - [x] FastAPI backend API
   - [x] Pre-built scenarios (conservative, aggressive, alpha_node)
+  - [x] **Web Frontend (Project Genesis)** — `software/cyclo_earth_web/`
+    - [x] Procedural 3D WebGL globe with landmass dots, reactor nodes, Contes beacon
+    - [x] 3-lever interactive Control Deck (Cycloreactors, Biochar, Reforestation)
+    - [x] Browser-side Hector-lite climate model (PSC equations in JS)
+    - [x] Easy Metrics scoreboard (temperature, CO₂, Golden Cross year)
+    - [x] Timeline chart (BAU vs PSC emission curves)
+    - [x] Reality Sync panel with live telemetry chart
+    - [x] Golden Cross celebration popup
+    - [ ] Hector C++ → WebAssembly build for high-fidelity browser-side model
 
 ---
 
 ## 🚀 PHASE 7 — C.Y.C.L.O.S. HUD (`/software/hud/`)
 *The "Stark-Tech" holographic command center for experimental visualization.*
 
-- [ ] **Front-End Architecture:**
-  - [ ] React 19 + Vite + Tailwind CSS (Glassmorphism UI)
-  - [ ] **React Three Fiber** for the central holographic 3D Twin
-- [ ] **Visual HUD Widgets:**
-  - [ ] "Arc Reactor" Phase-Lock dial for LED/Pump synchronization
-  - [ ] YOLOv8 "Sniper" Vision Feed overlay with targeting reticles
-  - [ ] Plastoquinone state matrix (Han model) hexagonal visualization
+- [x] **Front-End Foundation (Canvas HUD):**
+  - [x] HTML/CSS/JS glassmorphism HUD with neon bloom + CRT scanline overlay
+  - [x] Cinematic boot sequence (scanline, hex grid, terminal cascade)
+  - [x] "Arc Reactor" Phase-Lock ring (vortex RPM × LED PWM sync)
+  - [x] Shear Stress ECG monitor with danger threshold
+  - [x] Nanobubble Penetration array with rising micro-dots
+  - [x] YOLOv8 "Sniper" Vision Feed with bounding boxes + threat detection
+  - [x] Plastoquinone State Matrix (Han ODE) hexagonal visualization
+  - [x] Logarithmic Growth Curve with emerald fill
+  - [x] 2D particle reactor hologram (Rankine vortex + pulsing light guides)
+  - [x] AI Waveform visualizer + CO₂ ticker + Matrix terminal feed
+- [ ] **React Three Fiber Upgrade (Future):**
+  - [ ] Port canvas HUD to React 19 + Vite + Three.js
+  - [ ] Import `.GLTF` reactor model for true 3D hologram
+  - [ ] GLSL vertex shader for 100K-particle Rankine vortex
 - [ ] **Animations & Sound:**
-  - [ ] "J.A.R.V.I.S." boot sequence choreography (GSAP/Framer Motion)
   - [ ] Web Audio API integration for cinematic telemetry SFX
 - [ ] **Uplink:**
-  - [ ] Real-time Socket.io bridge to OpenCyclo OS telemetry stream
+  - [ ] Real-time WebSocket bridge to `telemetry_api.py` (SW-13)
+  - [ ] MQTT subscription for live sensor data
 
 ---
 
