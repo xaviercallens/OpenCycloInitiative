@@ -76,8 +76,8 @@
 | DT-02 | Simplified Physics Model | *(in DT-01)* | ✅ | — | — | Lightweight ODE model for testing without GPU |
 | DT-03 | Synthetic Vision Pipeline | `synthetic_vision/render_vdb.py` | ✅ | — | SW-11 | Blender headless renderer + YOLO auto-annotation |
 | DT-04 | Docker Compose Stack | `docker-compose.yml` | ✅ | — | — | 6 services: OpenFOAM, Modulus, Blender, SITL, Telemetry, MQTT |
-| DT-05 | PINN Surrogate (Modulus) | *(planned)* | ⬜ | CFD-06 | — | FNO training on CFD snapshots |
-| DT-06 | preCICE Coupling | *(planned)* | ⬜ | CFD-06, CFD-08 | — | Lagrangian particle → Han ODE coupling |
+| DT-05 | PINN Surrogate (Modulus) | `physics/cyclo_twin/pinn/train_fno.py` | ✅ | CFD-06 | — | FNO config, LHS sampling, physics residual losses, batch generation |
+| DT-06 | preCICE Coupling | `physics/cyclo_twin/precice_han_adapter.py` | ✅ | CFD-06, CFD-08 | — | 100K particle vectorized Han ODE + file/preCICE/TCP modes |
 
 ---
 
@@ -125,7 +125,7 @@
 | ID | Component | File | Status | Depends On | Blocks | Notes |
 |---|---|---|---|---|---|---|
 | HUD-01 | Holographic Dashboard | `software/hud/` | ✅ | — | — | 6 widgets, boot sequence, reactor hologram, CRT overlay |
-| HUD-02 | Live Telemetry Bridge | *(planned)* | ⬜ | SW-13, DT-01 | HUD-01 | WebSocket link to real-time telemetry API |
+| HUD-02 | Live Telemetry Bridge | `software/hud/telemetry_bridge.js` | 🔵 | SW-13, DT-01 | HUD-01 | WebSocket client wired into HUD; auto-reconnect with exponential backoff |
 
 ---
 
@@ -165,13 +165,13 @@
 | Hardware / CAD | 7 | 0 | 0 | 0 | 7 |
 | Software / OS | 14 | 12 | 1 | 0 | 1 |
 | CFD Simulation | 10 | 7 | 0 | 0 | 3 |
-| Digital Twin / SITL | 6 | 4 | 0 | 0 | 2 |
+| Digital Twin / SITL | 6 | 6 | 0 | 0 | 0 |
 | Wetware / SOPs | 5 | 5 | 0 | 0 | 0 |
 | Cyclo-Earth | 9 | 8 | 0 | 0 | 1 |
 | Garage Prototype | 4 | 4 | 0 | 0 | 0 |
-| C.Y.C.L.O.S. HUD | 2 | 1 | 0 | 0 | 1 |
+| C.Y.C.L.O.S. HUD | 2 | 1 | 1 | 0 | 0 |
 | Integration Points | 7 | 0 | 0 | 3 | 4 |
-| **TOTAL** | **64** | **41** | **1** | **3** | **19** |
+| **TOTAL** | **64** | **43** | **2** | **3** | **16** |
 
 ---
 

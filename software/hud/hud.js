@@ -870,11 +870,64 @@
 
 
     // ═══════════════════════════════════════════════════════
+    //  TELEMETRY BRIDGE INTEGRATION
+    // ═══════════════════════════════════════════════════════
+
+    let bridge = null;
+
+    function initTelemetryBridge() {
+        if (typeof window.TelemetryBridge === 'undefined') {
+            console.log('[HUD] TelemetryBridge not loaded — using LOCAL simulation only');
+            return;
+        }
+
+        bridge = new window.TelemetryBridge();
+
+        bridge.onData = (liveState) => {
+            // Override internal simulation state with live data
+            state.ph = liveState.ph;
+            state.density = liveState.density_g_l;
+            state.temp = liveState.temperature_c;
+            state.vortexRPM = liveState.vortexRPM;
+            state.shearRate = liveState.shearRate;
+            state.kLa = liveState.kLa;
+            state.fleEfficiency = liveState.fleEfficiency;
+            state.x1 = liveState.x1;
+            state.x2 = liveState.x2;
+            state.x3 = liveState.x3;
+            state.co2Total = liveState.co2Total;
+            state.threatDetected = liveState.threatDetected;
+            state.ledFreq = liveState.led_freq_hz;
+
+            // Use live history if available
+            if (bridge.getHistory('shear').length > 10) {
+                state.shearHistory = bridge.getHistory('shear');
+            }
+            if (bridge.getHistory('density').length > 10) {
+                state.growthHistory = bridge.getHistory('density');
+            }
+
+            // Apply to DOM elements
+            window.applyTelemetryToHUD(liveState);
+        };
+
+        bridge.onConnectionChange = (mode) => {
+            addTerminalLine();  // Log the connection event
+        };
+
+        // Attempt connection (non-blocking — falls back gracefully)
+        bridge.connect();
+    }
+
+
+    // ═══════════════════════════════════════════════════════
     //  INIT
     // ═══════════════════════════════════════════════════════
 
     document.addEventListener('DOMContentLoaded', () => {
         runBootSequence();
+        // Attempt live bridge after boot completes
+        setTimeout(initTelemetryBridge, 3500);
     });
 
 })();
