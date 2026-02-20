@@ -33,18 +33,9 @@ OpenCycloInitiative/CV-PBR-V1/
 │       ├── config.py              # System-wide configuration & constants
 │       └── requirements.txt       # Python dependencies
 ├── physics/                       # CFD simulation (OpenFOAM v2312)
-│   └── openfoam/
-│       ├── README.md
-│       ├── system/
-│       │   ├── snappyHexMeshDict  # Mesh generation config
-│       │   ├── fvSolution
-│       │   └── fvSchemes
-│       ├── constant/
-│       │   └── phaseProperties    # Multiphase fluid properties
-│       └── 0/                     # Boundary conditions
-│           ├── U.water
-│           ├── U.gas
-│           └── p_rgh
+│   ├── openfoam/                  # Base OpenFOAM case
+│   ├── cyclo_twin/                # Digital Twin (SITL, Han model, VDB rendering)
+│   └── cyclo_earth/               # Planetary Symbiosis Simulator
 └── wetware/                       # Biological SOPs & protocols
     └── protocols/
         ├── SOP-101_Media_Formulation.md
@@ -91,6 +82,8 @@ paraFoam  # Visualize results
 | **Control OS** | Python `asyncio` on Jetson Nano | Edge AI, real-time PID control |
 | **Soft Sensor** | YOLOv8 INT8 + OpenCV | Non-invasive biomass density estimation |
 | **CFD** | OpenFOAM `reactingMultiphaseEulerFoam` | Fluid mechanics validation |
+| **Digital Twin** | NVIDIA Modulus + Han ODE | PINN surrogate + photosynthetic model |
+| **Cyclo-Earth** | Hector-lite + PSC fluxes | Planetary CO₂ drawdown simulator |
 | **Biology** | *Chlorella vulgaris* UTEX 2714 | High shear-tolerant production strain |
 
 ---
