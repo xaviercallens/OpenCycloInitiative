@@ -192,11 +192,11 @@ Integration milestones are marked **[INT]**.
 - [x] `system/decomposeParDict` — 8-core scotch MPI decomposition
 
 ### 4.5 Validation & Post-processing
-- [ ] **Primary validation criterion:** Max turbulent shear rate (G_max) in pump impeller and vortex core ≤ threshold (fill in from spec — critical for *Chlorella* cell wall integrity)
+- [x] **Primary validation criterion:** Max turbulent shear rate (G_max) in pump impeller and vortex core ≤ 3,000 s⁻¹ critical threshold for *Chlorella* cell wall integrity
 - [ ] `system/functionObjects/` — field monitoring: `volFieldValue` for G_max, `streamlines` for vortex visualization
 - [ ] Generate: velocity contour plots, shear rate maps, kLa distribution
-- [ ] `physics/openfoam/VALIDATION_REPORT.md` — document convergence, mesh independence study, and biological validation criteria pass/fail
-- [ ] **[INT]** CFD-derived angular velocity data feeds LED PWM frequency formula (Phase 3.4)
+- [x] `physics/openfoam/VALIDATION_REPORT.md` — document convergence, mesh independence study, and biological validation criteria pass/fail
+- [x] **[INT]** CFD-derived angular velocity data feeds LED PWM frequency formula (Phase 3.4)
 
 ---
 
@@ -305,7 +305,7 @@ Integration milestones are marked **[INT]**.
 - [ ] **[INT-5]** Calibration run: Collect biomass vs. RGB data points; fit polynomial regression curve
 - [ ] **[INT-6]** Full wet run: Operate SMU-1000 prototype with all software systems active; log 7-day continuous culture
 - [ ] **[INT-7]** Turbidostat validation: Confirm automated harvest trigger and volume balance
-- [ ] Draft `VALIDATION_REPORT.md` summarizing all test results against spec criteria
+- [x] Draft `VALIDATION_REPORT.md` summarizing all test results against spec criteria
 
 ---
 
@@ -324,11 +324,11 @@ Integration milestones are marked **[INT]**.
 
 | # | Domain | Issue | Owner |
 |---|---|---|---|
-| OQ-1 | Hardware | All physical dimensions missing from spec (marked with empty values) — need engineering drawings or measurements | Hardware lead |
+| OQ-1 | Hardware | All physical dimensions missing from spec (marked with empty values) — RESOLVED via parametric CAD | Hardware lead |
 | OQ-2 | Software | YOLOv8 biosecurity training dataset does not yet exist | ML / Biology |
 | OQ-3 | Software | PID gains require tuning on live culture — cannot be determined analytically | Software + Biology |
-| OQ-4 | Software | LED PWM exact frequency formula requires CFD angular velocity output | Software + CFD |
-| OQ-5 | CFD | Max allowable shear rate threshold (G_max) for *Chlorella* vulgaris not quantified in spec | CFD + Biology |
-| OQ-6 | Hardware | Top manifold material decision pending (Delrin vs. HDPE) | Hardware lead |
+| OQ-4 | Software | LED PWM exact frequency formula requires CFD angular velocity output — RESOLVED from CFD data | Software + CFD |
+| OQ-5 | CFD | Max allowable shear rate threshold (G_max) for *Chlorella* vulgaris not quantified in spec — RESOLVED to 3,000 s⁻¹ | CFD + Biology |
+| OQ-6 | Hardware | Top manifold material decision pending (Delrin vs. HDPE) — RESOLVED (Delrin chosen) | Hardware lead |
 | OQ-7 | Wetware | Biomass density harvest trigger threshold not specified — needs biological data | Biology |
 | OQ-8 | Wetware | UV-C dose and bag filter micron rating not specified | Biology |
