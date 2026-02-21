@@ -285,9 +285,9 @@ Integration milestones are marked **[INT]**.
   - [x] 2D particle reactor hologram (Rankine vortex + pulsing light guides)
   - [x] AI Waveform visualizer + CO₂ ticker + Matrix terminal feed
 - [ ] **React Three Fiber Upgrade (Future):**
-  - [ ] Port canvas HUD to React 19 + Vite + Three.js
+  - [x] Port canvas HUD to React 19 + Vite + Three.js
   - [ ] Import `.GLTF` reactor model for true 3D hologram
-  - [ ] GLSL vertex shader for 100K-particle Rankine vortex
+  - [x] GLSL vertex shader for 100K-particle Rankine vortex
 - [x] **Animations & Sound:**
   - [x] Web Audio API integration for cinematic telemetry SFX
 - [x] **Uplink:**
