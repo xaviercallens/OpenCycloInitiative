@@ -1,0 +1,12 @@
+runtime: python39
+# This handles serving static HTML/JS/CSS without a python backend 
+# which is perfect for the Cyclo-Earth standalone Web Simulator
+
+handlers:
+- url: /
+  static_files: index.html
+  upload: index.html
+
+- url: /(.*)
+  static_files: \1
+  upload: (.*)
