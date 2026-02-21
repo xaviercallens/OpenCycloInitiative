@@ -12,7 +12,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&family=Fira+Code:wght@300;400;500&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="genesis.css">
+    <link rel="stylesheet" href="genesis.css?v=2">
 </head>
 
 <body>
@@ -70,6 +70,19 @@
             <h2 class="deck-title">THE CONTROL DECK</h2>
             <p class="deck-sub">"What if we actually tried?"</p>
 
+            <!-- Scenario Dropdown -->
+            <div class="scenario-selector">
+                <div class="lever-header">
+                    <span class="lever-icon">🌎</span>
+                    <span class="lever-name">Mission Scenario</span>
+                </div>
+                <select id="scenario-dropdown" class="cyber-select">
+                    <option value="custom">Custom Simulation</option>
+                    <option value="bau">Business As Usual (2050 Disaster)</option>
+                    <option value="golden">Project Genesis (2050 Golden Cross)</option>
+                </select>
+            </div>
+
             <!-- Lever 1: Deploy Cycloreactors -->
             <div class="lever" id="lever-reactors">
                 <div class="lever-header">
@@ -82,7 +95,7 @@
                         value="0" step="1">
                     <div class="lever-ticks">
                         <span>1 Unit</span>
-                        <span>100M Nodes</span>
+                        <span>10B Nodes</span>
                     </div>
                 </div>
                 <div class="lever-value" id="val-reactors">1 Garage Unit</div>
@@ -129,17 +142,16 @@
         <!-- RIGHT: EASY METRICS SCOREBOARD -->
         <!-- ═══════════════════════════════════════════ -->
         <div class="scoreboard" id="scoreboard">
+            <h2 class="deck-title" style="text-align:right;">EARTH SYSTEMS KPI</h2>
+            <p class="deck-sub" style="text-align:right; margin-bottom: 10px;">Global Energy & Carbon Budget</p>
+
             <!-- Temperature -->
             <div class="score-card" id="card-temp">
                 <div class="score-icon">🌡️</div>
                 <div class="score-content">
                     <div class="score-value" id="score-temp">+1.8</div>
                     <div class="score-unit">°C</div>
-                    <div class="score-label">Global Temperature</div>
-                    <div class="score-sub">Keeping the planet livable.</div>
-                </div>
-                <div class="score-bar">
-                    <div class="score-bar-fill" id="bar-temp" style="width: 65%"></div>
+                    <div class="score-label">Surface Temp Anomaly</div>
                 </div>
             </div>
 
@@ -150,26 +162,64 @@
                     <div class="score-value" id="score-co2">425</div>
                     <div class="score-unit">PPM</div>
                     <div class="score-label">Atmospheric CO₂</div>
-                    <div class="score-sub">Breathing easier.</div>
                 </div>
-                <div class="score-bar">
-                    <div class="score-bar-fill score-bar-amber" id="bar-co2" style="width: 72%"></div>
+            </div>
+
+            <!-- NASA Style Carbon Budget -->
+            <div class="budget-panel">
+                <div class="budget-title">GLOBAL CARBON FLUX (GtC / Yr)</div>
+                <div class="budget-row">
+                    <div class="budget-label" style="color:var(--crimson);">🔺 Fossil Emissions</div>
+                    <div class="budget-val" id="kpi-fossil" style="color:var(--crimson);">+10.50</div>
+                </div>
+                <div class="budget-row">
+                    <div class="budget-label" style="color:var(--amber);">🔻 Ocean Absorbtion</div>
+                    <div class="budget-val" id="kpi-ocean" style="color:var(--amber);">-2.40</div>
+                </div>
+                <div class="budget-row">
+                    <div class="budget-label" style="color:var(--amber);">🔻 Land Absorbtion</div>
+                    <div class="budget-val" id="kpi-land" style="color:var(--amber);">-3.10</div>
+                </div>
+                <div class="budget-row">
+                    <div class="budget-label" style="color:var(--emerald);">🔻 Forests (PSC)</div>
+                    <div class="budget-val" id="kpi-psc-forest" style="color:var(--emerald);">0.00</div>
+                </div>
+                <div class="budget-row">
+                    <div class="budget-label" style="color:var(--cyan);">🔻 Cycloreactors (PSC)</div>
+                    <div class="budget-val" id="kpi-psc-cyclo" style="color:var(--cyan);">0.00</div>
+                </div>
+                <div class="budget-divider"></div>
+                <div class="budget-row" style="font-weight:bold; font-size:12px;">
+                    <div class="budget-label">NET ATMOSPHERIC FLUX</div>
+                    <div class="budget-val" id="kpi-netflux">+5.00</div>
                 </div>
             </div>
 
             <!-- Golden Cross -->
-            <div class="score-card golden-cross-card" id="card-golden">
+            <div class="score-card golden-cross-card" id="card-golden" style="margin-top: 10px;">
                 <div class="score-icon">⚖️</div>
                 <div class="score-content">
                     <div class="score-value golden-cross-value" id="score-golden">NEVER</div>
-                    <div class="score-label">Net-Zero Year</div>
-                    <div class="score-sub">The "Golden Cross" — when we start healing.</div>
+                    <div class="score-label">Net-Zero Year target</div>
                 </div>
             </div>
+        </div>
 
-            <!-- Timeline Chart -->
-            <div class="score-card timeline-card">
-                <canvas id="timeline-canvas" width="340" height="130"></canvas>
+        <!-- ═══════════════════════════════════════════ -->
+        <!-- BOTTOM: TIME SCRUBBER (NASA STYLE) -->
+        <!-- ═══════════════════════════════════════════ -->
+        <div class="time-scrubber-panel">
+            <div class="time-header">
+                <div class="time-play-btn" id="time-play-btn">▶ PLAY</div>
+                <div class="time-display">YEAR: <span id="time-year-val" class="val-cyan">2026</span></div>
+            </div>
+            <div class="time-slider-container">
+                <span class="time-label">2025</span>
+                <input type="range" id="time-slider" class="time-slider" min="2025" max="2100" value="2026" step="1">
+                <span class="time-label">2100</span>
+            </div>
+            <div class="timeline-chart-wrap">
+                <canvas id="timeline-canvas" width="600" height="80"></canvas>
             </div>
         </div>
 

@@ -45,15 +45,22 @@
         const temp_bau = [];
         const net_emissions = [];
 
+        // Track specific fluxes for NASA KPI HUD
+        const flux_fossil = [];
+        const flux_cyclo = [];
+        const flux_soil = [];
+        const flux_reforest = [];
+        const flux_ocean_land_sink = [];
+
         // Scale slider values (0-100) to physical parameters
         const reactorPower = reactorSlider / 100;
         const biocharPower = biocharSlider / 100;
         const reforestPower = reforestSlider / 100;
 
-        // Fleet scaling: 1 unit → 100M nodes (exponential)
-        const initialModules = Math.max(1, Math.pow(10, reactorPower * 8));
-        const growthRate = 1.0 + reactorPower * 1.5; // 1x to 2.5x/yr
-        const maxModules = 1e8;
+        // Fleet scaling: 1 unit → 10B nodes (exponential)
+        const initialModules = Math.max(1, Math.pow(10, reactorPower * 10)); // 10^10 max
+        const growthRate = 1.0 + reactorPower * 2.5; // 1x to 3.5x/yr scale-out
+        const maxModules = 1e10; // 10 Billion Nodes
 
         // Biochar: 0 to 500M hectares
         const biocharHectares = biocharPower * 500e6;
@@ -120,12 +127,22 @@
                 goldenCross = year;
             }
 
+            // Ocean & Land Sinks (Baseline approx ~5.5 GtC total sink)
+            // As CO2 rises, sink increases slightly, simplified here for the HUD
+            const sink_c = 5.5 + (co2 - 280) * 0.01;
+
             years.push(year);
             co2_psc.push(co2);
             co2_bau.push(co2_b);
             temp_psc.push(temp);
             temp_bau.push(temp_b);
             net_emissions.push(netGtC);
+
+            flux_fossil.push(bauEmissions);
+            flux_cyclo.push(fCycloGtC);
+            flux_soil.push(charC + soilGain);
+            flux_reforest.push(reforestC);
+            flux_ocean_land_sink.push(sink_c);
         }
 
         const final = years.length - 1;
@@ -136,6 +153,11 @@
             temp_psc,
             temp_bau,
             net_emissions,
+            flux_fossil,
+            flux_cyclo,
+            flux_soil,
+            flux_reforest,
+            flux_ocean_land_sink,
             goldenCross,
             final_co2: co2_psc[final],
             final_temp: temp_psc[final],
@@ -532,7 +554,7 @@
         const reforestVal = parseInt(document.getElementById('slider-reforest').value);
 
         // Update labels
-        const modules = Math.max(1, Math.pow(10, reactorVal / 100 * 8));
+        const modules = Math.max(1, Math.pow(10, reactorVal / 100 * 10)); // matched to 10^10 max
         document.getElementById('val-reactors').textContent = formatModules(modules);
         document.getElementById('val-biochar').textContent = formatHectares(biocharVal);
         document.getElementById('val-reforest').textContent = formatTrees(reforestVal);
@@ -551,48 +573,57 @@
     }
 
     function updateScoreboard(r) {
+        const yearSlider = document.getElementById('time-slider');
+        if (!yearSlider) return;
+        const currentYear = parseInt(yearSlider.value);
+        const yearIdx = currentYear - 2025;
+
         const tempEl = document.getElementById('score-temp');
         const co2El = document.getElementById('score-co2');
         const goldenEl = document.getElementById('score-golden');
-        const barTemp = document.getElementById('bar-temp');
-        const barCO2 = document.getElementById('bar-co2');
-        const atmoOverlay = document.getElementById('atmo-overlay');
 
-        // By 2100 values
-        const finalTemp = r.final_temp;
-        const finalCO2 = r.final_co2;
+        // Scrubber exact values
+        const currentTemp = r.temp_psc[yearIdx];
+        const currentCO2 = r.co2_psc[yearIdx];
 
-        tempEl.textContent = (finalTemp >= 0 ? '+' : '') + finalTemp.toFixed(1);
-        co2El.textContent = Math.round(finalCO2);
+        tempEl.textContent = (currentTemp >= 0 ? '+' : '') + currentTemp.toFixed(1);
+        co2El.textContent = Math.round(currentCO2);
 
         // Color coding
-        const isCool = finalTemp < 1.5;
-        tempEl.className = 'score-value' + (isCool ? ' cool' : (finalTemp < 2.0 ? ' cool' : ''));
-        co2El.className = 'score-value' + (finalCO2 < 400 ? ' safe' : (finalCO2 < 450 ? ' cool' : ''));
+        const isCool = currentTemp < 1.5;
+        tempEl.className = 'score-value' + (isCool ? ' cool' : (currentTemp < 2.0 ? ' cool' : ''));
+        co2El.className = 'score-value' + (currentCO2 < 400 ? ' safe' : (currentCO2 < 450 ? ' cool' : ''));
 
-        // Bars
-        const tempPct = Math.min(100, Math.max(0, (finalTemp / 4) * 100));
-        const co2Pct = Math.min(100, Math.max(0, ((finalCO2 - 280) / 300) * 100));
-        barTemp.style.width = tempPct + '%';
-        barCO2.style.width = co2Pct + '%';
-        barTemp.className = 'score-bar-fill' + (isCool ? ' cool' : '');
-        barCO2.className = 'score-bar-fill' + (finalCO2 < 400 ? ' cool' : '');
+        // NASA Budget Panel Updates
+        if (r.flux_fossil) {
+            document.getElementById('kpi-fossil').textContent = "+" + r.flux_fossil[yearIdx].toFixed(2);
+            document.getElementById('kpi-ocean').textContent = "-" + (r.flux_ocean_land_sink[yearIdx] * 0.45).toFixed(2); // approximate stat split
+            document.getElementById('kpi-land').textContent = "-" + (r.flux_ocean_land_sink[yearIdx] * 0.55).toFixed(2);
+            document.getElementById('kpi-psc-forest').textContent = "-" + r.flux_reforest[yearIdx].toFixed(2);
+            document.getElementById('kpi-psc-cyclo').textContent = "-" + r.flux_cyclo[yearIdx].toFixed(2);
+
+            const net = r.net_emissions[yearIdx];
+            const netEl = document.getElementById('kpi-netflux');
+            netEl.textContent = (net > 0 ? "+" : "") + net.toFixed(2);
+            netEl.style.color = net > 0 ? "var(--amber)" : "var(--emerald)";
+        }
 
         // Golden Cross
         if (r.goldenCross) {
             goldenEl.textContent = r.goldenCross;
             goldenEl.className = 'score-value golden-cross-value safe';
 
-            // Show celebration (once per threshold crossing)
-            if (!goldenShown) {
+            if (!goldenShown && currentYear >= r.goldenCross) {
                 goldenShown = true;
                 const popup = document.getElementById('golden-popup');
-                popup.classList.remove('hidden');
-                popup.classList.add('show');
-                setTimeout(() => {
-                    popup.classList.remove('show');
-                    popup.classList.add('hidden');
-                }, 4000);
+                if (popup) {
+                    popup.classList.remove('hidden');
+                    popup.classList.add('show');
+                    setTimeout(() => {
+                        popup.classList.remove('show');
+                        popup.classList.add('hidden');
+                    }, 4000);
+                }
             }
         } else {
             goldenEl.textContent = 'NEVER';
@@ -601,13 +632,16 @@
         }
 
         // Atmosphere overlay
-        const healthLevel = Math.max(0, Math.min(1, 1 - (finalTemp - 1.0) / 2.5));
+        const atmoOverlay = document.getElementById('atmo-overlay');
+        const healthLevel = Math.max(0, Math.min(1, 1 - (currentTemp - 1.0) / 2.5));
         if (healthLevel > 0.5) {
             atmoOverlay.classList.add('healthy');
         } else {
             atmoOverlay.classList.remove('healthy');
         }
     }
+
+
 
 
     // ═══════════════════════════════════════════════════════
@@ -678,7 +712,55 @@
 
                 // Bind sliders
                 ['slider-reactors', 'slider-biochar', 'slider-reforest'].forEach(id => {
-                    document.getElementById(id).addEventListener('input', onSliderChange);
+                    document.getElementById(id).addEventListener('input', () => {
+                        document.getElementById('scenario-dropdown').value = 'custom';
+                        onSliderChange();
+                    });
+                });
+
+                // Bind Time Scrubber
+                const timeSlider = document.getElementById('time-slider');
+                const timeYearVal = document.getElementById('time-year-val');
+                timeSlider.addEventListener('input', () => {
+                    timeYearVal.textContent = timeSlider.value;
+                    if (currentResults) updateScoreboard(currentResults);
+                });
+
+                // Bind Time Play Button
+                let playInterval = null;
+                const playBtn = document.getElementById('time-play-btn');
+                playBtn.addEventListener('click', () => {
+                    if (playInterval) {
+                        clearInterval(playInterval);
+                        playInterval = null;
+                        playBtn.textContent = '▶ PLAY';
+                    } else {
+                        playBtn.textContent = '⏸ PAUSE';
+                        playInterval = setInterval(() => {
+                            let val = parseInt(timeSlider.value);
+                            if (val >= 2100) val = 2025;
+                            val++;
+                            timeSlider.value = val;
+                            timeYearVal.textContent = val;
+                            if (currentResults) updateScoreboard(currentResults);
+                        }, 200);
+                    }
+                });
+
+                // Bind Scenario Dropdown
+                document.getElementById('scenario-dropdown').addEventListener('change', (e) => {
+                    const mode = e.target.value;
+                    if (mode === 'bau') {
+                        document.getElementById('slider-reactors').value = 0;
+                        document.getElementById('slider-biochar').value = 0;
+                        document.getElementById('slider-reforest').value = 0;
+                        onSliderChange();
+                    } else if (mode === 'golden') {
+                        document.getElementById('slider-reactors').value = 93; // Approx 3.2B nodes
+                        document.getElementById('slider-biochar').value = 100;
+                        document.getElementById('slider-reforest').value = 10;
+                        onSliderChange();
+                    }
                 });
 
                 // Bind Initiate Button
@@ -689,6 +771,13 @@
                         heroHeader.style.transition = 'opacity 1s ease';
                         heroHeader.style.opacity = '0';
                         setTimeout(() => heroHeader.classList.add('hidden'), 1000);
+
+                        // Start an auto-scenario
+                        document.getElementById('scenario-dropdown').value = 'golden';
+                        document.getElementById('scenario-dropdown').dispatchEvent(new Event('change'));
+
+                        // Auto-play time
+                        setTimeout(() => { playBtn.click(); }, 1500);
                     });
                 }
 
